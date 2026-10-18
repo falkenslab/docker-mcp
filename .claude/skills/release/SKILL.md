@@ -13,6 +13,7 @@ A release is a version commit, a `vX.Y.Z` tag on `main`, a GitHub release and th
 Stop and report at the first that fails:
 
 - No `"private": true` in `package.json`: with it, this is still the template, which isn't released (`npm run init` removes it).
+- `"publishConfig": { "access": "public" }` in `package.json`: without it, npm publishes the scoped package as private and refuses with 402 Payment Required.
 - On `main`, working tree clean, up to date with `origin/main` (`git fetch && git status -sb`). No remote yet: stop and ask.
 - The `verify` skill is green, the site included.
 - `gh auth status` works.
