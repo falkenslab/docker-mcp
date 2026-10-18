@@ -1,21 +1,21 @@
-/* Falken's Lab colors: a warm orange on light pages, a brighter one on dark. */
+/* The logo's coral: a deeper one on light pages (4.7:1 on white), the logo's own on dark (6.4:1). */
 :root {
-  --ifm-color-primary: #c2410c;
-  --ifm-color-primary-dark: #af3a0b;
-  --ifm-color-primary-darker: #a5370a;
-  --ifm-color-primary-darkest: #882d08;
-  --ifm-color-primary-light: #d5480d;
-  --ifm-color-primary-lighter: #df4b0e;
-  --ifm-color-primary-lightest: #f15f22;
+  --ifm-color-primary: #e11d48;
+  --ifm-color-primary-dark: #cb1a41;
+  --ifm-color-primary-darker: #bf193d;
+  --ifm-color-primary-darkest: #9e1432;
+  --ifm-color-primary-light: #e5335a;
+  --ifm-color-primary-lighter: #e63e63;
+  --ifm-color-primary-lightest: #ea607e;
   --ifm-code-font-size: 92%;
 }
 
 [data-theme="dark"] {
-  --ifm-color-primary: #f98012;
-  --ifm-color-primary-dark: #ee7206;
-  --ifm-color-primary-darker: #e16c06;
-  --ifm-color-primary-darkest: #b95905;
-  --ifm-color-primary-light: #fa8f2f;
-  --ifm-color-primary-lighter: #fa973e;
-  --ifm-color-primary-lightest: #fbae69;
+  --ifm-color-primary: #fb7185;
+  --ifm-color-primary-dark: #fa4e67;
+  --ifm-color-primary-darker: #fa3c57;
+  --ifm-color-primary-darkest: #f8072a;
+  --ifm-color-primary-light: #fc94a3;
+  --ifm-color-primary-lighter: #fca6b3;
+  --ifm-color-primary-lightest: #fedbe0;
 }

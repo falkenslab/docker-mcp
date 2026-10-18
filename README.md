@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/falkenslab/docker-mcp/main/docs/static/img/logo.svg" alt="docker-mcp logo: four containers on a hull, plugged in" width="112"/>
+<img src="https://raw.githubusercontent.com/falkenslab/docker-mcp/main/docs/static/img/logo.svg" alt="docker-mcp logo: two puzzle pieces fitting together, a robot for the agent and stacked containers for Docker" width="112"/>
 
 # docker-mcp
 
