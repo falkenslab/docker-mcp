@@ -1,6 +1,6 @@
 {
   "name": "@falkenslab/docker-mcp",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Docker for AI agents: a complete set of tools, with modes chosen at startup (read, lab, full).",
   "license": "MIT",
   "author": "Falken's Lab",
@@ -15,6 +15,9 @@
   "keywords": [
     "mcp",
     "model-context-protocol",
+    "docker",
+    "containers",
+    "compose",
     "agent-kit"
   ],
   "type": "module",
@@ -47,6 +50,7 @@
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.1",
+    "yaml": "^2.9.1",
     "zod": "^4.6.5"
   }
 }

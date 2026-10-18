@@ -30,7 +30,15 @@ export interface RequirementStatus {
 }
 
 /** The requirements of this server. Empty: it needs nothing installed apart. */
-export const REQUIREMENTS: Requirement[] = [];
+export const REQUIREMENTS: Requirement[] = [
+  {
+    name: "Docker",
+    program: "docker",
+    version: { args: ["--version"], min: "24.0.0" },
+    install: { windows: "winget install Docker.DockerDesktop", macos: "brew install --cask docker", url: "https://docs.docker.com/get-started/get-docker/" },
+    for: "running containers, images and labs",
+  },
+];
 
 type System = "windows" | "macos" | "linux";
 const system = (): System => (process.platform === "win32" ? "windows" : process.platform === "darwin" ? "macos" : "linux");

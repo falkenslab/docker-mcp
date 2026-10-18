@@ -2,9 +2,8 @@
 
 **docker-mcp**: Docker for AI agents: a complete set of tools, with modes chosen at startup (read, lab, full).
 
-- **What**: an MCP server over stdio, published on npm as `@falkenslab/docker-mcp`, that an AI app (Claude Code, Claude Desktop, an agent built on agent-kit) starts with `npx`.
-- **For whom**: the people those agents work for, through Falken's Lab's agents (miyagi for teachers, padawan for students) or any MCP client.
-- **How it reaches agents**: as an extension in [agent-kit-extensions](https://github.com/falkenslab/agent-kit-extensions), which pins its version, adds the skills to use it well and declares its capabilities.
-- **Out of scope**: anything an agent's own tools already do (reading and writing local files, the shell), and the craft of the domain around it, which belongs to the agent.
-
-Replace this file's text when the template becomes a real server (`npm run init`): what it does, for whom, and what it leaves out.
+- **What**: an MCP server over stdio, published on npm as `@falkenslab/docker-mcp`, that works the person's Docker through its command line: containers, images, volumes, networks, Compose, the system, and labs (practices under a safety policy).
+- **Modes** (ADR-005): `read` only reads; `lab` runs only labs, under the policy of ADR-006, and sees only their containers; `full` (the default) does everything, with destructive tools marked and dangerous container options needing the person's explicit yes. Areas narrow a mode further.
+- **For whom**: anyone whose agent needs Docker; in Falken's Lab's agents, teachers checking practices (miyagi) and students doing them (padawan), who use lab mode.
+- **How it reaches agents**: as the `docker-mcp` extension in [agent-kit-extensions](https://github.com/falkenslab/agent-kit-extensions), which pins its version, adds the skills and declares its capabilities and its requirement (Docker 24 or later).
+- **Out of scope**: installing Docker (ADR-004), Kubernetes and swarm, registries' accounts (`docker login` is the person's), and teaching how to use Docker, which belongs to the agent.

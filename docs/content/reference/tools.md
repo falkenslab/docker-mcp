@@ -7,16 +7,522 @@ sidebar_label: Tools
 
 # Tools
 
-This server has **1 tools**. This page is generated from the server itself, so it lists them exactly as your AI app gets them, with the descriptions the agent reads. You don't call tools yourself: you ask in your own words, and the agent picks them.
+This server has **43 tools**. This page is generated from the server itself, so it lists them exactly as your AI app gets them, with the descriptions the agent reads. You don't call tools yourself: you ask in your own words, and the agent picks them.
 
 | Tool | What it does | Only reads |
 | --- | --- | :-: |
 | [`server_info`](#server-info) | Server info | ✓ |
+| [`check_requirements`](#check-requirements) | Check the programs this server needs | ✓ |
+| [`docker_info`](#docker-info) | Docker's information | ✓ |
+| [`disk_usage`](#disk-usage) | Docker's disk usage | ✓ |
+| [`prune`](#prune) | Clean up Docker |  |
+| [`list_containers`](#list-containers) | List containers | ✓ |
+| [`inspect_container`](#inspect-container) | Inspect a container | ✓ |
+| [`container_logs`](#container-logs) | A container's logs | ✓ |
+| [`run_container`](#run-container) | Run a container |  |
+| [`start_container`](#start-container) | Start a container |  |
+| [`stop_container`](#stop-container) | Stop a container |  |
+| [`restart_container`](#restart-container) | Restart a container |  |
+| [`remove_container`](#remove-container) | Remove a container |  |
+| [`exec_in_container`](#exec-in-container) | Run a command in a container |  |
+| [`copy_to_container`](#copy-to-container) | Copy files into a container |  |
+| [`copy_from_container`](#copy-from-container) | Copy files out of a container |  |
+| [`list_images`](#list-images) | List images | ✓ |
+| [`inspect_image`](#inspect-image) | Inspect an image | ✓ |
+| [`pull_image`](#pull-image) | Pull an image |  |
+| [`build_image`](#build-image) | Build an image |  |
+| [`tag_image`](#tag-image) | Tag an image |  |
+| [`remove_image`](#remove-image) | Remove an image |  |
+| [`list_volumes`](#list-volumes) | List volumes | ✓ |
+| [`inspect_volume`](#inspect-volume) | Inspect a volume | ✓ |
+| [`create_volume`](#create-volume) | Create a volume |  |
+| [`remove_volume`](#remove-volume) | Remove a volume |  |
+| [`list_networks`](#list-networks) | List networks | ✓ |
+| [`inspect_network`](#inspect-network) | Inspect a network | ✓ |
+| [`create_network`](#create-network) | Create a network |  |
+| [`remove_network`](#remove-network) | Remove a network |  |
+| [`compose_ps`](#compose-ps) | A Compose project's services | ✓ |
+| [`compose_logs`](#compose-logs) | A Compose project's logs | ✓ |
+| [`compose_up`](#compose-up) | Start a Compose project |  |
+| [`compose_down`](#compose-down) | Stop a Compose project |  |
+| [`compose_exec`](#compose-exec) | Run a command in a Compose service |  |
+| [`list_labs`](#list-labs) | List the labs | ✓ |
+| [`lab_status`](#lab-status) | A lab's status | ✓ |
+| [`lab_logs`](#lab-logs) | A lab's logs | ✓ |
+| [`lab_up`](#lab-up) | Start a lab |  |
+| [`lab_exec`](#lab-exec) | Run a command in a lab |  |
+| [`lab_check`](#lab-check) | Check a lab |  |
+| [`lab_reset`](#lab-reset) | Reset a lab |  |
+| [`lab_down`](#lab-down) | Stop a lab |  |
 
 ## `server_info` {#server-info}
 
 **Server info**
 
-Show this server's name, version and data folder, and, for a server that needs programs installed apart, whether they're there. Contains no secrets.
+Show this server's name, version, mode (read, lab or full) and areas, its labs and data folders, and whether Docker is there. Contains no secrets.
 
 *No inputs.*
+
+## `check_requirements` {#check-requirements}
+
+**Check the programs this server needs**
+
+Check the programs this server needs installed apart on the person's computer: whether each is there, its version, and, when one is missing or too old, how to install it on this system. Never installs anything: tell the person what to do.
+
+*No inputs.*
+
+## `docker_info` {#docker-info}
+
+**Docker's information**
+
+Docker's version, the engine's operating system and architecture, its CPUs and memory, and how many containers (running, stopped) and images there are. A first call to check Docker is up.
+
+*No inputs.*
+
+## `disk_usage` {#disk-usage}
+
+**Docker's disk usage**
+
+How much disk Docker uses for images, containers, volumes and the build cache, and how much of it could be reclaimed by prune.
+
+*No inputs.*
+
+## `prune` {#prune}
+
+**Clean up Docker**
+
+Remove what isn't in use: stopped containers, dangling images (all unused ones with allImages), unused networks, unused volumes (only when volumes is true: their data is gone) and the build cache. Says how much space it freed. Can't be undone: confirm with the person first, naming what goes.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `what` | ✅ | `containers`, `images`, `networks`, `volumes`, `build-cache`, `everything` | everything: containers, networks, dangling images and build cache (volumes only with volumes: true) |
+| `allImages` |  | boolean | Images: every unused one, not only the dangling ones |
+| `volumes` |  | boolean | everything: also unused volumes and their data |
+
+## `list_containers` {#list-containers}
+
+**List containers**
+
+List Docker containers, running or not (all unless running is true): id, name, image, state, status and ports. Names and ids are what the other container tools take.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `running` |  | boolean | Only the running ones |
+
+## `inspect_container` {#inspect-container}
+
+**Inspect a container**
+
+A container's details: image, command, state (with its exit code), ports, mounts, networks and labels, and the names of its environment variables (never their values, which may hold secrets).
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `container` | ✅ | string | The container's name or id, as its list gives it |
+
+## `container_logs` {#container-logs}
+
+**A container's logs**
+
+A container's last log lines (stdout and stderr), 200 by default; the start is left out when they're very long.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `container` | ✅ | string | The container's name or id, as its list gives it |
+| `tail` |  | integer | How many lines from the end |
+| `since` |  | string | Only since then: a timestamp, or a duration like 10m |
+
+## `run_container` {#run-container}
+
+**Run a container**
+
+Create and start a container from an image (pulled if missing), in the background unless detach is false. Dangerous options (privileged, the host's network, processes or IPC, extra capabilities, devices, mounting the Docker socket, the host's root or the person's home) are refused unless confirmedDangerous is true: ask the person first, naming what they give the container. Changes the machine: confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `image` | ✅ | string | The image, e.g. nginx:1.27 or postgres:17 |
+| `name` |  | string |  |
+| `command` |  | string list | The command and its arguments, one per item; the image's when missing |
+| `env` |  | object | Environment variables |
+| `ports` |  | string list | Published ports, "host:container", e.g. "8080:80"; "127.0.0.1:8080:80" to keep them on this computer |
+| `volumes` |  | string list | Mounts, "named-volume:/path" or "/host/path:/path[:ro]" |
+| `network` |  | string | A network to join |
+| `workdir` |  | string |  |
+| `detach` |  | boolean | In the background (default); false waits for it to finish and returns its output |
+| `remove` |  | boolean | Remove it when it stops |
+| `restart` |  | `no`, `on-failure`, `unless-stopped`, `always` |  |
+| `privileged` |  | boolean |  |
+| `capAdd` |  | string list |  |
+| `devices` |  | string list |  |
+| `pid` |  | string |  |
+| `ipc` |  | string |  |
+| `confirmedDangerous` |  | boolean | The person confirmed the dangerous options, knowing what they give the container |
+
+## `start_container` {#start-container}
+
+**Start a container**
+
+Start an existing container. Confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `container` | ✅ | string | The container's name or id, as its list gives it |
+
+## `stop_container` {#stop-container}
+
+**Stop a container**
+
+Stop an existing container (it gets 10 seconds to stop cleanly). Confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `container` | ✅ | string | The container's name or id, as its list gives it |
+
+## `restart_container` {#restart-container}
+
+**Restart a container**
+
+Restart an existing container. Confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `container` | ✅ | string | The container's name or id, as its list gives it |
+
+## `remove_container` {#remove-container}
+
+**Remove a container**
+
+Remove a container, with force to stop it first if it's running, and with volumes to remove its anonymous volumes. Its data is gone: confirm with the person first, naming it.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `container` | ✅ | string | The container's name or id, as its list gives it |
+| `force` |  | boolean |  |
+| `volumes` |  | boolean |  |
+
+## `exec_in_container` {#exec-in-container}
+
+**Run a command in a container**
+
+Run a command in a running container and return its exit code and output (stdout and stderr together), stopped after timeoutSeconds. The command is a list, one argument per item; for a shell line, use ["sh", "-c", "…"]. Can change the container: confirm with the person first unless it only reads.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `container` | ✅ | string | The container's name or id, as its list gives it |
+| `command` | ✅ | string list |  |
+| `workdir` |  | string |  |
+| `user` |  | string |  |
+| `env` |  | object |  |
+| `timeoutSeconds` |  | integer |  |
+
+## `copy_to_container` {#copy-to-container}
+
+**Copy files into a container**
+
+Copy a local file or folder into a container's path. Overwrites what's there: confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `container` | ✅ | string | The container's name or id, as its list gives it |
+| `from` | ✅ | string | A local file or folder (absolute path) |
+| `to` | ✅ | string | The path in the container |
+
+## `copy_from_container` {#copy-from-container}
+
+**Copy files out of a container**
+
+Copy a container's file or folder to a local path. Overwrites what's there locally: confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `container` | ✅ | string | The container's name or id, as its list gives it |
+| `from` | ✅ | string | The path in the container |
+| `to` | ✅ | string | A local path (absolute) |
+
+## `list_images` {#list-images}
+
+**List images**
+
+List the local Docker images: id, repository, tag, size and when each was created.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `dangling` |  | boolean | Only untagged images left by builds |
+
+## `inspect_image` {#inspect-image}
+
+**Inspect an image**
+
+An image's details: tags, size, architecture, the command and entry point it runs, its exposed ports, working directory, volumes and labels.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `image` | ✅ | string | The image's name or id, as its list gives it |
+
+## `pull_image` {#pull-image}
+
+**Pull an image**
+
+Download an image from its registry (Docker Hub unless it names another), e.g. postgres:17. Uses the network and disk: confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `image` | ✅ | string | The image, with its tag: nginx:1.27, ghcr.io/owner/name:tag |
+
+## `build_image` {#build-image}
+
+**Build an image**
+
+Build an image from a local folder with a Dockerfile, and tag it. Returns the build's output (its end when long). Uses the network and disk: confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `context` | ✅ | string | The build's folder (absolute path) |
+| `tag` | ✅ | string | The tag to give it, e.g. my-app:1.0 |
+| `dockerfile` |  | string | The Dockerfile, when it isn't the context's Dockerfile |
+| `buildArgs` |  | object |  |
+| `noCache` |  | boolean |  |
+
+## `tag_image` {#tag-image}
+
+**Tag an image**
+
+Give an image another name and tag (the image itself isn't copied). Confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `image` | ✅ | string | The image's name or id, as its list gives it |
+| `tag` | ✅ | string | The new name:tag |
+
+## `remove_image` {#remove-image}
+
+**Remove an image**
+
+Remove a local image (with force, even if a stopped container uses it). It has to be pulled or built again to be used: confirm with the person first, naming it.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `image` | ✅ | string | The image's name or id, as its list gives it |
+| `force` |  | boolean |  |
+
+## `list_volumes` {#list-volumes}
+
+**List volumes**
+
+List Docker volumes: name, driver and where it lives.
+
+*No inputs.*
+
+## `inspect_volume` {#inspect-volume}
+
+**Inspect a volume**
+
+A volume's details: driver, mount point, labels and when it was created.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `volume` | ✅ | string | The volume's name or id, as its list gives it |
+
+## `create_volume` {#create-volume}
+
+**Create a volume**
+
+Create a named volume, for data that outlives a container. Confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `name` | ✅ | string |  |
+
+## `remove_volume` {#remove-volume}
+
+**Remove a volume**
+
+Remove a volume and every file in it. Can't be undone: confirm with the person first, naming it.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `volume` | ✅ | string | The volume's name or id, as its list gives it |
+
+## `list_networks` {#list-networks}
+
+**List networks**
+
+List Docker networks: id, name, driver and scope.
+
+*No inputs.*
+
+## `inspect_network` {#inspect-network}
+
+**Inspect a network**
+
+A network's details: driver, subnet, whether it's internal, and the containers attached.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `network` | ✅ | string | The network's name or id, as its list gives it |
+
+## `create_network` {#create-network}
+
+**Create a network**
+
+Create a network, internal if it shouldn't reach the outside. Confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `name` | ✅ | string |  |
+| `internal` |  | boolean |  |
+
+## `remove_network` {#remove-network}
+
+**Remove a network**
+
+Remove a network (no container may be attached). Confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `network` | ✅ | string | The network's name or id, as its list gives it |
+
+## `compose_ps` {#compose-ps}
+
+**A Compose project's services**
+
+The services of a Compose project and their containers' state.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `folder` | ✅ | string | The Compose project's folder (absolute path), where its compose.yaml is |
+| `file` |  | string | Its compose file, when it isn't the folder's compose.yaml |
+
+## `compose_logs` {#compose-logs}
+
+**A Compose project's logs**
+
+The last log lines of a Compose project's services (or one), 200 per service by default.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `folder` | ✅ | string | The Compose project's folder (absolute path), where its compose.yaml is |
+| `file` |  | string | Its compose file, when it isn't the folder's compose.yaml |
+| `service` |  | string |  |
+| `tail` |  | integer |  |
+
+## `compose_up` {#compose-up}
+
+**Start a Compose project**
+
+Start a Compose project's services in the background (building what has a build), or only some. Runs whatever its compose file says, privileged services and host mounts included: read it first and confirm with the person, naming anything dangerous in it.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `folder` | ✅ | string | The Compose project's folder (absolute path), where its compose.yaml is |
+| `file` |  | string | Its compose file, when it isn't the folder's compose.yaml |
+| `services` |  | string list |  |
+| `build` |  | boolean |  |
+
+## `compose_down` {#compose-down}
+
+**Stop a Compose project**
+
+Stop and remove a Compose project's containers and networks; with volumes, its volumes and their data too. Confirm with the person first, saying whether the data goes.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `folder` | ✅ | string | The Compose project's folder (absolute path), where its compose.yaml is |
+| `file` |  | string | Its compose file, when it isn't the folder's compose.yaml |
+| `volumes` |  | boolean |  |
+
+## `compose_exec` {#compose-exec}
+
+**Run a command in a Compose service**
+
+Run a command in a running service of a Compose project, returning its exit code and output. The command is a list; for a shell line, ["sh", "-c", "…"]. Can change the service: confirm with the person first unless it only reads.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `folder` | ✅ | string | The Compose project's folder (absolute path), where its compose.yaml is |
+| `file` |  | string | Its compose file, when it isn't the folder's compose.yaml |
+| `service` | ✅ | string |  |
+| `command` | ✅ | string list |  |
+| `timeoutSeconds` |  | integer |  |
+
+## `list_labs` {#list-labs}
+
+**List the labs**
+
+List the labs: practices in the labs folder (C:\Users\fvarrui\.docker-mcp\labs), each a folder with its compose.yaml and, optionally, a lab.json with the check that says whether it works.
+
+*No inputs.*
+
+## `lab_status` {#lab-status}
+
+**A lab's status**
+
+A lab's services and their containers' state (empty when it isn't running).
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `lab` | ✅ | string | The lab's name, as list_labs gives it |
+
+## `lab_logs` {#lab-logs}
+
+**A lab's logs**
+
+The last log lines of a lab's services (or one), 200 per service by default.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `lab` | ✅ | string | The lab's name, as list_labs gives it |
+| `service` |  | string | One of the lab's services, as lab_status gives them |
+| `tail` |  | integer |  |
+
+## `lab_up` {#lab-up}
+
+**Start a lab**
+
+Start a lab under lab mode's policy: no privileged services, no host mounts but the lab's own folder, never the Docker socket, limits of 1 CPU and 512m per service, without internet (so the host can't reach its ports either: check it from inside with lab_exec). A lab that breaks the policy is refused with the reason. Confirm with the person first, saying what it will run (its services and images).
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `lab` | ✅ | string | The lab's name, as list_labs gives it |
+
+## `lab_exec` {#lab-exec}
+
+**Run a command in a lab**
+
+Run a command in one of a running lab's services, returning its exit code and output. The command is a list; for a shell line, ["sh", "-c", "…"]. Can change the lab: confirm with the person first unless it only reads.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `lab` | ✅ | string | The lab's name, as list_labs gives it |
+| `service` | ✅ | string | One of the lab's services, as lab_status gives them |
+| `command` | ✅ | string list |  |
+| `timeoutSeconds` |  | integer |  |
+
+## `lab_check` {#lab-check}
+
+**Check a lab**
+
+Run the lab's check (its lab.json) in its running service: passed when it exits 0, with its output to explain what failed. For a teacher, whether a statement or a solution works; for a student, whether their practice does. Runs inside the lab: confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `lab` | ✅ | string | The lab's name, as list_labs gives it |
+
+## `lab_reset` {#lab-reset}
+
+**Reset a lab**
+
+Back to a clean start: the lab's containers, networks and volumes are removed (what was done inside them is lost; the files in its folder stay) and it starts again. Confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `lab` | ✅ | string | The lab's name, as list_labs gives it |
+
+## `lab_down` {#lab-down}
+
+**Stop a lab**
+
+Stop a lab and remove its containers, networks and volumes (what was done inside them is lost; the files in its folder stay). Confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `lab` | ✅ | string | The lab's name, as list_labs gives it |

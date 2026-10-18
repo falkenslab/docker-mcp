@@ -4,9 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-`@falkenslab/docker-mcp`: Docker for AI agents: a complete set of tools, with modes chosen at startup (read, lab, full). An MCP server over stdio, bundled into one file and run with `npx`; agents built on agent-kit get it through its extension in [agent-kit-extensions](https://github.com/falkenslab/agent-kit-extensions). Read `.minispec/README.md` first: it says what to read for each task.
-
-If this is still the template (`package.json` says `"private": true`), turn it into a server with `npm run init -- <name> "<description>"`, then rewrite `.minispec/core/project.md` and the README for it.
+`@falkenslab/docker-mcp`: Docker for AI agents: a complete set of tools, with modes chosen at startup (read, lab, full). An MCP server over stdio, bundled into one file and run with `npx`; agents built on agent-kit get it through its extension in [agent-kit-extensions](https://github.com/falkenslab/agent-kit-extensions). Read `.minispec/README.md` first: it says what to read for each task. The tools are thin calls to Docker's CLI (`src/docker.ts`, replaceable by a fake in tests); the modes and areas that decide which exist are ADR-005 (`src/config.ts`, `toolsFor()` in `src/tools/index.ts`), and labs and their policy are ADR-006 (`src/labs.ts`, `src/policy.ts`).
 
 ## Commands
 

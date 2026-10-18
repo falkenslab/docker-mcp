@@ -1,39 +1,24 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { createServer } from "../src/createServer.js";
-
-async function connect() {
-  const server = createServer();
-  const client = new Client({ name: "test", version: "0.0.0" });
-  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-  await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
-  return client;
-}
+import { connect, testConfig } from "./helpers.js";
 
 describe("createServer", () => {
-  it("sends its instructions", async () => {
-    const client = await connect();
-    assert.match(client.getInstructions() ?? "", /read-only/);
+  it("sends its instructions, with its mode", async () => {
+    const instructions = (await connect(testConfig({ DOCKER_MCP_MODE: "lab" }))).getInstructions() ?? "";
+    assert.match(instructions, /read-only/);
+    assert.match(instructions, /lab mode/);
   });
 
-  it("lists server_info as read-only", async () => {
+  it("lists server_info and check_requirements as read-only", async () => {
     const { tools } = await (await connect()).listTools();
-    const tool = tools.find((t) => t.name === "server_info");
-    assert.ok(tool);
-    assert.equal(tool.annotations?.readOnlyHint, true);
+    for (const name of ["server_info", "check_requirements"]) assert.equal(tools.find((t) => t.name === name)?.annotations?.readOnlyHint, true, name);
   });
 
-  it("has no check_requirements when it needs nothing installed apart", async () => {
-    const { tools } = await (await connect()).listTools();
-    assert.equal(tools.some((t) => t.name === "check_requirements"), false);
-  });
-
-  it("returns its name, version and data folder", async () => {
-    const result = await (await connect()).callTool({ name: "server_info", arguments: {} });
+  it("returns its name, version, mode and areas", async () => {
+    const result = await (await connect(testConfig({ DOCKER_MCP_MODE: "read", DOCKER_MCP_SCOPES: "containers,images" }))).callTool({ name: "server_info", arguments: {} });
     const info = result.structuredContent as Record<string, unknown>;
     assert.equal(info.name, "@falkenslab/docker-mcp");
-    assert.equal(typeof info.dataDir, "string");
+    assert.equal(info.mode, "read");
+    assert.deepEqual(info.areas, ["containers", "images"]);
   });
 });

@@ -1,65 +1,78 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/falkenslab/docker-mcp/main/docs/static/img/logo.svg" alt="docker-mcp logo: a plug" width="112"/>
+<img src="https://raw.githubusercontent.com/falkenslab/docker-mcp/main/docs/static/img/logo.svg" alt="docker-mcp logo: four containers on a hull, plugged in" width="112"/>
 
 # docker-mcp
 
-**Docker for AI agents: a complete set of tools, with modes chosen at startup (read, lab, full).**<br/>
-The starting point for Falken's Lab's MCP servers: one bundled file, tests, docs in English and Spanish, ready for agent-kit.
+**Your AI agent works Docker for you: containers, images, Compose and practice labs.**<br/>
+A complete set of tools, with modes chosen at startup: only read, only safe labs, or everything.
 
+[![npm](https://img.shields.io/npm/v/@falkenslab/docker-mcp?color=cb3837&logo=npm)](https://www.npmjs.com/package/@falkenslab/docker-mcp)
 ![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)
+![Docker 24+](https://img.shields.io/badge/Docker-24%2B-1d63ed?logo=docker&logoColor=white)
 ![MCP server](https://img.shields.io/badge/MCP-server-0b0b0b)
 [![License: MIT](https://img.shields.io/badge/license-MIT-16a34a)](LICENSE)
 
-**[🧩 Use this template](https://github.com/falkenslab/docker-mcp/generate)**
+**[📖 Documentation](https://falkenslab.github.io/docker-mcp/)** · [📖 Documentación en español](https://falkenslab.github.io/docker-mcp/es/)
 
 </div>
 
-This is a template repository: every Falken's Lab MCP server starts here, so they all look and work the same. It's an MCP server over stdio, written in TypeScript with the official MCP SDK and bundled into a single file that runs with `npx`, so an agent built on [agent-kit](https://github.com/falkenslab/agent-kit) can run it without installing anything. It comes with one example tool, tests, a strict check of its tools, CI, a documentation site in English and Spanish, and the design notes every server shares.
+docker-mcp is an MCP server that lets an AI agent (Claude Code, Codex, an agent built on [agent-kit](https://github.com/falkenslab/agent-kit)) work the Docker on your computer: run and inspect containers, build and pull images, manage volumes and networks, start Compose projects, clean up, and run practice labs that check themselves. You choose how far it can go when it starts: `read` only looks, `lab` only runs labs under a safety policy, and `full` does everything Docker does, asking before anything dangerous. It drives Docker's own command line, so it works wherever Docker does.
 
-## ✨ Why this template
+## ✨ Why docker-mcp
 
-- 📦 **One file, nothing to install.** esbuild bundles every dependency into `dist/server.mjs`, which agent-kit runs with `npx`.
-- 🧭 **Tools a model chooses well.** Each tool has a title, a description for the model, schemas and `readOnlyHint`, and `npm run check` fails if one doesn't.
-- 🔧 **Programs installed apart, explained.** A server that needs Docker or ffmpeg declares it once and gets `check_requirements` and clear errors; it never installs anything.
-- 🧪 **Tested from the start.** `node:test` with the SDK's in-memory transport, and CI on Node 20 and 24.
-- 🌍 **Docs in two languages.** A Docusaurus site in English and Spanish, with the tools reference generated from the server itself.
-- 🧠 **Design memory.** `.minispec/` with the decisions every Falken's Lab server shares, and a `CLAUDE.md` for coding agents.
+- 🎚️ **Modes, not trust.** A tool outside the mode doesn't exist for the agent: in `read` it can't change anything, in `lab` it can't run anything but labs.
+- 🛡️ **Asks before the dangerous.** Removing anything is marked destructive, and a privileged container, the host's network or the Docker socket needs your explicit yes.
+- 🧪 **Labs for practices.** A folder with a `compose.yaml` and a check: no internet, no host mounts, limits on CPU and memory, refused if it breaks the rules, reset in one call.
+- 🧰 **The whole of Docker.** 43 tools over containers, images, volumes, networks, Compose and the system, each with structured results.
+- 🔧 **Explains, never installs.** Without Docker, or with it stopped, it says how to install or start it.
+- 📦 **Nothing to install.** One bundled file run with `npx`, for agent-kit, Claude Code and Codex alike.
 
 ## 🚀 Quick start
 
-On GitHub, **Use this template** to create the new repository, then:
+You need [Node.js](https://nodejs.org) 20 or later and [Docker](https://docs.docker.com/get-started/get-docker/) 24 or later, running.
 
 ```bash
-npm install
-npm run init -- docker-lab-mcp "Hands-on practices in Docker, safe by default."
-npm run build && npm run check
+# Claude Code (full mode)
+claude mcp add docker -- npx -y @falkenslab/docker-mcp
+
+# Only labs, with the practices in a folder of your own
+claude mcp add docker -e DOCKER_MCP_MODE=lab -e DOCKER_MCP_LABS_DIR=/path/to/labs -- npx -y @falkenslab/docker-mcp
 ```
 
-`init` renames the package, the command, the links and the docs, and notes in `.minispec/core/stack.md` the template's commit it comes from, so later fixes here can be found with `git log <commit>..main`. Then rewrite `.minispec/core/project.md` and this README for the new server, and add its tools in `src/tools/`.
+In an agent built on agent-kit, or with its skills in Claude Code and Codex, install the `docker-mcp` extension from [agent-kit-extensions](https://github.com/falkenslab/agent-kit-extensions). Then ask: "What containers are running?"
+
+## 💬 What you can ask
+
+- 🧑‍💻 "Start a PostgreSQL 17 with a volume for its data, on port 5432 only for this computer."
+- 🧑‍💻 "Why does my web container keep restarting? Look at its logs."
+- 🧑‍💻 "How much disk is Docker using, and what could I clean up?"
+- 👩‍🏫 "Start the volumes lab and check the solution works."
+- 🧑‍🎓 "Reset my lab: I broke the database."
 
 ## 🧰 What's inside
 
-| Area | For example |
+| Area | Tools |
 | --- | --- |
-| 🔌 Server | `src/server.ts` (stdio), `src/createServer.ts`, `src/instructions.ts` |
-| 🛠️ Tools | `server_info`, one file per tool in `src/tools/`, `reply()` for structured results |
-| 🔧 Requirements | `src/requirements.ts`: `check_requirements` and `needs()`, only when a server needs programs |
-| 🧪 Checks | `npm test`, `npm run check` (strict `tools/list`), typecheck and lint, CI |
-| 📖 Docs | `docs/`, Docusaurus in English and Spanish, published to GitHub Pages by each server (the template only builds it) |
-| 🧠 Design | `.minispec/` (project, conventions, ADRs), `CLAUDE.md` |
+| 📦 Containers | `list_containers`, `inspect_container`, `container_logs`, `run_container`, `start_container`, `stop_container`, `restart_container`, `remove_container`, `exec_in_container`, `copy_to_container`, `copy_from_container` |
+| 🖼️ Images | `list_images`, `inspect_image`, `pull_image`, `build_image`, `tag_image`, `remove_image` |
+| 💾 Volumes and networks | `list_volumes`, `inspect_volume`, `create_volume`, `remove_volume`, and the same for networks |
+| 🧩 Compose | `compose_ps`, `compose_logs`, `compose_up`, `compose_down`, `compose_exec` |
+| ⚙️ System | `docker_info`, `disk_usage`, `prune` |
+| 🧪 Labs | `list_labs`, `lab_status`, `lab_logs`, `lab_up`, `lab_exec`, `lab_check`, `lab_reset`, `lab_down` |
+| 🔌 Server | `server_info`, `check_requirements` |
+
+Every tool, with what each mode keeps: [the tools reference](https://falkenslab.github.io/docker-mcp/reference/tools).
 
 ## 📚 Documentation
 
-The template has no site of its own: `docs/` is the one each server publishes. What a new server needs is here:
-
-- **[CLAUDE.md](CLAUDE.md)**: the commands, how the pieces fit, and the skills in `.claude/skills/` (adding a tool, checks, docs, releases).
-- **[.minispec/](.minispec/README.md)**: the project, its conventions and the decisions every Falken's Lab server shares.
-- **[docs/](docs/)**: the site's skeleton, with getting started, the tools reference generated from the server and the releases; `cd docs && npm install && npm start` previews it.
+- **[Getting started](https://falkenslab.github.io/docker-mcp/getting-started)**: installing it in your AI app.
+- **[Modes and settings](https://falkenslab.github.io/docker-mcp/modes)**: `read`, `lab` and `full`, the areas, and the labs' policy.
+- **[Tools](https://falkenslab.github.io/docker-mcp/reference/tools)**: every tool, generated from the server.
 
 ## 🛠️ Developing
 
-`npm run build`, `npm test` and `npm run check` before every commit; `CLAUDE.md` lists every command, and `.minispec/` the decisions behind them. Releases are published to npm by the owner.
+`npm install`, then `npm run build`, `npm test` and `npm run check` before every commit; `CLAUDE.md` lists every command and `.minispec/` the decisions behind them (the modes are ADR-005, the labs' policy ADR-006). Releases are published to npm by the owner.
 
 <div align="center">
 
