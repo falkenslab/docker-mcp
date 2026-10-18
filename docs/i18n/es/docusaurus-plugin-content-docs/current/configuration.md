@@ -140,4 +140,4 @@ Deja solo lo que cambies. Las claves propias de Codex para la entrada:
 
 ### Como plugin
 
-El plugin del marketplace de Falken's Lab (mira [Primeros pasos](getting-started.md#en-codex)) trae también las skills, pero Codex no tiene ajustes para plugins: funciona en modo full con la carpeta de laboratorios por defecto. Para otro modo, configúralo como arriba.
+El plugin del marketplace de Falken's Lab (mira [Empezar](getting-started.md#en-codex)) trae también las skills, pero Codex no tiene ajustes para plugins: funciona en modo full con la carpeta de laboratorios por defecto. Para otro modo, configúralo como arriba.

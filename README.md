@@ -50,6 +50,20 @@ In Codex, `codex mcp add docker -- npx -y @falkenslab/docker-mcp`. To write it i
 - 👩‍🏫 "Start the volumes lab and check the solution works."
 - 🧑‍🎓 "Reset my lab: I broke the database."
 
+## 📸 See it at work
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/falkenslab/docker-mcp/main/docs/static/img/see-it-claude-code.png" alt="Claude Code starting a lab with docker-mcp and its check passing" width="760"/>
+</p>
+
+<p align="center"><em>Claude Code, in lab mode: it starts a practice lab and its check passes, all through docker-mcp.</em></p>
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/falkenslab/docker-mcp/main/docs/static/img/see-it-codex.png" alt="Codex asking before it starts a lab, then starting it with docker-mcp and running its check" width="760"/>
+</p>
+
+<p align="center"><em>Codex, with the same lab: it asks before starting it, then calls lab_up and lab_check.</em></p>
+
 ## 🧰 What's inside
 
 | Area | Tools |
