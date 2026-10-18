@@ -16,9 +16,9 @@ Tú decides hasta dónde puede llegar al arrancarlo: **read** solo mira, **lab**
 
 *Claude Code, en modo lab: arranca un laboratorio de prácticas y su comprobación pasa, todo a través de docker-mcp.*
 
-![Codex preguntando antes de arrancar un laboratorio, y luego arrancándolo con docker-mcp y pasando su comprobación](/img/see-it-codex.png)
+![Codex arrancando un laboratorio con docker-mcp y pasando su comprobación](/img/see-it-codex.png)
 
-*Codex, con el mismo laboratorio: pregunta antes de arrancarlo y luego llama a lab_up y lab_check.*
+*Codex, con el mismo laboratorio: llama a list_labs, lab_up y lab_check, y la comprobación pasa.*
 
 - **[Empezar](getting-started.md)**: instalarlo en tu aplicación de IA.
 - **[Configuración](configuration.md)**: `.mcp.json`, el `config.toml` de Codex o sus líneas de comandos, con todos los ajustes.

@@ -16,9 +16,9 @@ You choose how far it can go when it starts: **read** only looks, **lab** only r
 
 *Claude Code, in lab mode: it starts a practice lab and its check passes, all through docker-mcp.*
 
-![Codex asking before it starts a lab, then starting it with docker-mcp and running its check](/img/see-it-codex.png)
+![Codex starting a lab with docker-mcp and running its check](/img/see-it-codex.png)
 
-*Codex, with the same lab: it asks before starting it, then calls lab_up and lab_check.*
+*Codex, with the same lab: it calls list_labs, lab_up and lab_check, and the check passes.*
 
 - **[Getting started](getting-started.md)**: install it in your AI app.
 - **[Configuration](configuration.md)**: `.mcp.json`, Codex's `config.toml` or their command lines, with every setting.
