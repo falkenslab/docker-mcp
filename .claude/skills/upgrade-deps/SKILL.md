@@ -1,9 +1,9 @@
 ---
 name: upgrade-deps
-description: Upgrade mcp-server-template's dependencies - the MCP TypeScript SDK, zod, esbuild, TypeScript, the lint stack and Docusaurus - and re-check what the server relies on. Use when the user asks to bump a dependency, or when investigating a behavior change after an update.
+description: Upgrade docker-mcp's dependencies - the MCP TypeScript SDK, zod, esbuild, TypeScript, the lint stack and Docusaurus - and re-check what the server relies on. Use when the user asks to bump a dependency, or when investigating a behavior change after an update.
 ---
 
-# Upgrading mcp-server-template's dependencies
+# Upgrading docker-mcp's dependencies
 
 Every dependency is a `devDependency`: it ends up inside `dist/server.mjs` (ADR-001), so an upgrade changes the bundle people run. An upgrade is more than `npm update`.
 

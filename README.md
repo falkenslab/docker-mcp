@@ -1,17 +1,17 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/falkenslab/mcp-server-template/main/docs/static/img/logo.svg" alt="mcp-server-template logo: a plug" width="112"/>
+<img src="https://raw.githubusercontent.com/falkenslab/docker-mcp/main/docs/static/img/logo.svg" alt="docker-mcp logo: a plug" width="112"/>
 
-# mcp-server-template
+# docker-mcp
 
-**A Falken's Lab MCP server.**<br/>
+**Docker for AI agents: a complete set of tools, with modes chosen at startup (read, lab, full).**<br/>
 The starting point for Falken's Lab's MCP servers: one bundled file, tests, docs in English and Spanish, ready for agent-kit.
 
 ![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)
 ![MCP server](https://img.shields.io/badge/MCP-server-0b0b0b)
 [![License: MIT](https://img.shields.io/badge/license-MIT-16a34a)](LICENSE)
 
-**[🧩 Use this template](https://github.com/falkenslab/mcp-server-template/generate)**
+**[🧩 Use this template](https://github.com/falkenslab/docker-mcp/generate)**
 
 </div>
 

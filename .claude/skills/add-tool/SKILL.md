@@ -1,9 +1,9 @@
 ---
 name: add-tool
-description: Checklist for adding or changing a mcp-server-template tool - where the domain logic goes, how the tool file is written (name, schemas, annotations, description, reply), registering it, requirements, tests, the strict check and the docs to update. Use when adding a tool, or changing one's inputs, outputs or behavior.
+description: Checklist for adding or changing a docker-mcp tool - where the domain logic goes, how the tool file is written (name, schemas, annotations, description, reply), registering it, requirements, tests, the strict check and the docs to update. Use when adding a tool, or changing one's inputs, outputs or behavior.
 ---
 
-# Adding a mcp-server-template tool
+# Adding a docker-mcp tool
 
 ## 1. The domain's logic goes in its own module
 

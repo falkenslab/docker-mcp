@@ -6,13 +6,13 @@ import type * as Preset from "@docusaurus/preset-classic";
 // The released versions' docs are snapshots (versions.json, made on each release); the current docs
 // are the next release's, shown as such until one is cut.
 const released = existsSync(new URL("./versions.json", import.meta.url));
-const NAME = "mcp-server-template";
+const NAME = "docker-mcp";
 const REPO = `https://github.com/falkenslab/${NAME}`;
 const NPM = `https://www.npmjs.com/package/@falkenslab/${NAME}`;
 
 const config: Config = {
   title: NAME,
-  tagline: "A Falken's Lab MCP server.",
+  tagline: "Docker for AI agents: a complete set of tools, with modes chosen at startup (read, lab, full).",
   favicon: "img/logo.svg",
 
   url: "https://falkenslab.github.io",

@@ -13,22 +13,22 @@ Instala su extensión desde el marketplace de Falken's Lab, que ejecuta este ser
 
 ```bash
 my-agent extension marketplace add falkenslab/agent-kit-extensions
-my-agent extension add mcp-server-template@falkenslab
+my-agent extension add docker-mcp@falkenslab
 ```
 
 ## En Claude Code
 
 ```bash
-claude mcp add mcp-server-template -- npx -y @falkenslab/mcp-server-template
+claude mcp add docker-mcp -- npx -y @falkenslab/docker-mcp
 ```
 
 O, con sus skills, como plugin del mismo marketplace:
 
 ```bash
 claude plugin marketplace add falkenslab/agent-kit-extensions
-claude plugin install mcp-server-template@falkenslab
+claude plugin install docker-mcp@falkenslab
 ```
 
 ## Comprobar que funciona
 
-Pregunta al agente: «¿Qué versión de mcp-server-template estás usando?». Llamará a `server_info`.
+Pregunta al agente: «¿Qué versión de docker-mcp estás usando?». Llamará a `server_info`.

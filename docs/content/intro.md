@@ -4,9 +4,9 @@ sidebar_label: Introduction
 slug: /
 ---
 
-# mcp-server-template
+# docker-mcp
 
-A Falken's Lab MCP server.
+Docker for AI agents: a complete set of tools, with modes chosen at startup (read, lab, full).
 
 It's an [MCP](https://modelcontextprotocol.io) server: an AI app (Claude Code, Claude Desktop, an agent built on [agent-kit](https://falkenslab.github.io/agent-kit/)) starts it and gets its tools. You don't call the tools yourself: you ask in your own words, and the agent picks them.
 

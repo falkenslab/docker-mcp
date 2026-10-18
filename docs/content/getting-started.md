@@ -13,22 +13,22 @@ Install its extension from Falken's Lab's marketplace, which runs this server at
 
 ```bash
 my-agent extension marketplace add falkenslab/agent-kit-extensions
-my-agent extension add mcp-server-template@falkenslab
+my-agent extension add docker-mcp@falkenslab
 ```
 
 ## In Claude Code
 
 ```bash
-claude mcp add mcp-server-template -- npx -y @falkenslab/mcp-server-template
+claude mcp add docker-mcp -- npx -y @falkenslab/docker-mcp
 ```
 
 Or, with its skills, as a plugin from the same marketplace:
 
 ```bash
 claude plugin marketplace add falkenslab/agent-kit-extensions
-claude plugin install mcp-server-template@falkenslab
+claude plugin install docker-mcp@falkenslab
 ```
 
 ## Checking it works
 
-Ask the agent: "Which version of mcp-server-template are you using?" It calls `server_info`.
+Ask the agent: "Which version of docker-mcp are you using?" It calls `server_info`.

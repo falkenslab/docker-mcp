@@ -1,9 +1,9 @@
 ---
 name: verify
-description: Run mcp-server-template's full quality gate (typecheck, lint, tests, the one-file bundle, the strict tools/list check, and the docs site when docs/ changed) and report the result. Use before committing, before a release, and after any change under src/, test/, scripts/ or docs/.
+description: Run docker-mcp's full quality gate (typecheck, lint, tests, the one-file bundle, the strict tools/list check, and the docs site when docs/ changed) and report the result. Use before committing, before a release, and after any change under src/, test/, scripts/ or docs/.
 ---
 
-# Verify mcp-server-template
+# Verify docker-mcp
 
 Run from the repo root, in this order, stopping at the first failure and reporting it. It's what CI runs, on Node 20 and 24.
 

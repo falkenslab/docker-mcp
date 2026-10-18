@@ -33,7 +33,7 @@ describe("createServer", () => {
   it("returns its name, version and data folder", async () => {
     const result = await (await connect()).callTool({ name: "server_info", arguments: {} });
     const info = result.structuredContent as Record<string, unknown>;
-    assert.equal(info.name, "@falkenslab/mcp-server-template");
+    assert.equal(info.name, "@falkenslab/docker-mcp");
     assert.equal(typeof info.dataDir, "string");
   });
 });

@@ -1,9 +1,9 @@
 ---
 name: update-docs
-description: Keep mcp-server-template's documentation in step with the code - the documentation site in docs/ (English and Spanish, with the tools reference generated from the bundle), the README, the MiniSpec core and decisions, CLAUDE.md and the server's instructions. Use after any change to a tool, a setting, a requirement, the instructions or the build, before committing it. A change is not done until its documentation is.
+description: Keep docker-mcp's documentation in step with the code - the documentation site in docs/ (English and Spanish, with the tools reference generated from the bundle), the README, the MiniSpec core and decisions, CLAUDE.md and the server's instructions. Use after any change to a tool, a setting, a requirement, the instructions or the build, before committing it. A change is not done until its documentation is.
 ---
 
-# Keep mcp-server-template's docs up to date
+# Keep docker-mcp's docs up to date
 
 Documentation here is for three readers: people installing and using the server (the site in `docs/`, English in `docs/content/` and Spanish in `docs/i18n/es/docusaurus-plugin-content-docs/current/`, in plain terms, not for developers; the README is a front door with a quick start), people developing it, and future sessions working on it (`.minispec/`, `CLAUDE.md`). Every page changes in both languages in the same commit. Code that changes what a client sees, can configure or must do, and isn't documented, is unfinished work.
 

@@ -1,17 +1,16 @@
 {
-  "name": "@falkenslab/mcp-server-template",
+  "name": "@falkenslab/docker-mcp",
   "version": "0.0.0",
-  "private": true,
-  "description": "A Falken's Lab MCP server.",
+  "description": "Docker for AI agents: a complete set of tools, with modes chosen at startup (read, lab, full).",
   "license": "MIT",
   "author": "Falken's Lab",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/falkenslab/mcp-server-template.git"
+    "url": "git+https://github.com/falkenslab/docker-mcp.git"
   },
-  "homepage": "https://falkenslab.github.io/mcp-server-template/",
+  "homepage": "https://falkenslab.github.io/docker-mcp/",
   "bugs": {
-    "url": "https://github.com/falkenslab/mcp-server-template/issues"
+    "url": "https://github.com/falkenslab/docker-mcp/issues"
   },
   "keywords": [
     "mcp",
@@ -20,7 +19,7 @@
   ],
   "type": "module",
   "bin": {
-    "mcp-server-template": "dist/server.mjs"
+    "docker-mcp": "dist/server.mjs"
   },
   "files": [
     "dist/server.mjs"
@@ -29,7 +28,6 @@
     "node": ">=20"
   },
   "scripts": {
-    "init": "node scripts/init.mjs",
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs --watch",
     "typecheck": "tsc --noEmit",

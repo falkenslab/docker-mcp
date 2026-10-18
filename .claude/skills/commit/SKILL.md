@@ -1,9 +1,9 @@
 ---
 name: commit
-description: Create smart, atomic commits for mcp-server-template following the repo's conventions (Conventional Commits, English messages, grouped by logical change, staged by path). Use whenever the user asks to commit, or when finishing a piece of work that should be committed.
+description: Create smart, atomic commits for docker-mcp following the repo's conventions (Conventional Commits, English messages, grouped by logical change, staged by path). Use whenever the user asks to commit, or when finishing a piece of work that should be committed.
 ---
 
-# Smart commits for mcp-server-template
+# Smart commits for docker-mcp
 
 Commit each logical step as you finish it. Never push, and never create a remote, unless the owner asks.
 
