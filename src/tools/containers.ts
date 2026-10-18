@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { docker, dockerOutput, forModel, jsonLines } from "../docker.js";
 import { dangers } from "../policy.js";
+import { parseStats, parseTop } from "../usage.js";
 import { reply } from "./reply.js";
 import { LABEL, ownedInLab, ref, withDocker } from "./shared.js";
 import { ALL_MODES, FULL, type ToolEntry } from "./types.js";
@@ -91,6 +92,64 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
             const result = await dockerOutput(["logs", "--tail", String(tail), ...(since ? ["--since", since] : []), id]);
             if (result.code !== 0) throw new Error(result.stderr.trim());
             return reply(forModel(`${result.stdout}${result.stderr}`));
+          }),
+      ),
+  },
+  {
+    area: "containers",
+    modes: ALL_MODES,
+    register: (server, { config }) =>
+      server.registerTool(
+        "container_stats",
+        {
+          title: "Containers' resource usage",
+          description: `What containers consume right now, one snapshot (not a stream): CPU, memory (used, limit, percent), network and disk I/O, and processes. All running containers, or the ones named; a stopped one shows zeros. ${config.mode === "lab" ? "In lab mode, only the labs' containers. " : ""}Use it to answer why the computer is slow or which container uses the most; container_processes shows what runs inside one.`,
+          inputSchema: { containers: z.array(container).optional().describe("Only these containers; all running ones when missing") },
+          outputSchema: {
+            containers: z.array(
+              z.object({
+                id: z.string(),
+                name: z.string(),
+                cpu: z.string().describe("Percent of one CPU, e.g. 12.5%; above 100% uses more than one"),
+                memoryUsage: z.string(),
+                memoryLimit: z.string(),
+                memoryPercent: z.string(),
+                networkReceived: z.string(),
+                networkSent: z.string(),
+                blockRead: z.string(),
+                blockWritten: z.string(),
+                processes: z.number().int(),
+              }),
+            ),
+          },
+          annotations: { readOnlyHint: true, openWorldHint: false },
+        },
+        async ({ containers }) =>
+          withDocker(async () => {
+            for (const id of containers ?? []) await ownedInLab(config, id);
+            const targets = containers?.length ? containers : config.mode === "lab" ? (await docker(["ps", "-q", "--filter", `label=${LABEL}`])).split(/\s+/).filter(Boolean) : [];
+            if (config.mode === "lab" && !targets.length) return reply({ containers: [] });
+            return reply({ containers: parseStats(await docker(["stats", "--no-stream", "--format", "{{json .}}", ...targets])) });
+          }),
+      ),
+  },
+  {
+    area: "containers",
+    modes: ALL_MODES,
+    register: (server, { config }) =>
+      server.registerTool(
+        "container_processes",
+        {
+          title: "A container's processes",
+          description: "The processes running inside a container (docker top): their user, PID, start time, CPU time and command, with the columns Docker gives. The container must be running.",
+          inputSchema: { container },
+          outputSchema: { columns: z.array(z.string()), processes: z.array(z.record(z.string(), z.string())).describe("One per process, keyed by column") },
+          annotations: { readOnlyHint: true, openWorldHint: false },
+        },
+        async ({ container: id }) =>
+          withDocker(async () => {
+            await ownedInLab(config, id);
+            return reply(parseTop(await docker(["top", id])));
           }),
       ),
   },

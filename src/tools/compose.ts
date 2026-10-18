@@ -58,6 +58,32 @@ export const COMPOSE_TOOLS: ToolEntry[] = [
     modes: FULL,
     register: (server) =>
       server.registerTool(
+        "compose_build",
+        {
+          title: "Build a Compose project",
+          description: "Build the images of a Compose project's services that have a build (all, or some), without starting anything: to check a Dockerfile change, or to have the images ready. Returns the exit code and the build's output (its end when long); a failed build says why at the end. Uses the network and disk: confirm with the person first.",
+          inputSchema: {
+            folder,
+            file,
+            services: z.array(service).optional().describe("Only these services; all with a build when missing"),
+            noCache: z.boolean().default(false).describe("Build every step again, ignoring the cache"),
+            pull: z.boolean().default(false).describe("Pull newer versions of the base images first"),
+          },
+          outputSchema: { exitCode: z.number().int(), output: z.string(), truncated: z.boolean() },
+          annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+        },
+        async ({ folder: dir, file: f, services, noCache, pull }) =>
+          withDocker(async () => {
+            const result = await dockerOutput([...base(dir, f), "build", ...(noCache ? ["--no-cache"] : []), ...(pull ? ["--pull"] : []), ...(services ?? [])], { cwd: dir, timeoutMs: 1_800_000 });
+            return reply({ exitCode: result.code, ...forModel(`${result.stdout}${result.stderr}`) });
+          }),
+      ),
+  },
+  {
+    area: "compose",
+    modes: FULL,
+    register: (server) =>
+      server.registerTool(
         "compose_up",
         {
           title: "Start a Compose project",

@@ -13,9 +13,11 @@ The mode decides which tools exist. A tool outside the mode isn't offered to the
 
 | Mode | What the agent can do |
 | --- | --- |
-| `read` | Only look: list and inspect containers, images, volumes and networks, read logs, Compose projects and labs' status, Docker's information and disk usage |
+| `read` | Only look: list and inspect containers, images, volumes and networks, read logs, see what containers consume and run, Compose projects and labs' status, Docker's information and disk usage |
 | `lab` | Only labs: start, use, check, reset and stop them, under the policy below; it sees only the labs' containers |
 | `full` (default) | Everything Docker does. Removing anything is marked destructive, so the agent confirms it first, and a container with dangerous options needs your explicit yes |
+
+Pushing an image to a registry uses the login you made yourself with `docker login`: the agent never asks for your password or token, and when there is no login it tells you what to run in your own terminal.
 
 The dangerous options are: a privileged container, the host's network, processes or IPC, extra capabilities, devices, and mounting the Docker socket, the host's root folder or your home folder. With any of them, `run_container` refuses until the agent has asked you and calls again saying you agreed.
 

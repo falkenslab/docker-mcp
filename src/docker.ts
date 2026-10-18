@@ -52,6 +52,7 @@ export function explain(stderr: string): string {
     return "Docker is installed but not running: ask the person to start Docker Desktop (or the Docker service), then try again.";
   if (/permission denied.*docker\.sock/i.test(text)) return "This user can't use Docker: on Linux, add them to the docker group (then log in again) or run Docker rootless.";
   if (/no such (container|image|volume|network|object)/i.test(text)) return `${text} List them first to get a valid name or id.`;
+  if (/container [0-9a-f]+ is not running/i.test(text)) return "That container isn't running: start it first, then try again.";
   return text || "Docker failed without a message.";
 }
 

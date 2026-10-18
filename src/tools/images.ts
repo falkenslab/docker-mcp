@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { docker, dockerOutput, forModel, jsonLines } from "../docker.js";
+import { docker, dockerOutput, explain, forModel, jsonLines } from "../docker.js";
+import { loginCommand, needsLogin, registryOf } from "../registry.js";
 import { reply } from "./reply.js";
 import { ref, withDocker } from "./shared.js";
 import { ALL_MODES, FULL, type ToolEntry } from "./types.js";
@@ -136,6 +137,34 @@ export const IMAGE_TOOLS: ToolEntry[] = [
           withDocker(async () => {
             await docker(["tag", id, tag]);
             return reply({ image: id, tag });
+          }),
+      ),
+  },
+  {
+    area: "images",
+    modes: FULL,
+    register: (server) =>
+      server.registerTool(
+        "push_image",
+        {
+          title: "Push an image",
+          description:
+            "Upload a local image to its registry: Docker Hub unless its name starts with another (ghcr.io/owner/name:tag); give it that name first with tag_image. It publishes the image, maybe publicly: confirm with the person first, naming the registry and the tag. It uses the login the person made themselves with docker login; without one, it says what they must run in their own terminal. Never ask for their password or token.",
+          inputSchema: { image: z.string().min(1).regex(/^[A-Za-z0-9][A-Za-z0-9_.:/@-]*$/, "an image's name, not an option").describe("The image with its registry, name and tag, e.g. ghcr.io/owner/app:1.0") },
+          outputSchema: { image: z.string(), registry: z.string(), output: z.string(), truncated: z.boolean() },
+          annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+        },
+        async ({ image: name }) =>
+          withDocker(async () => {
+            const registry = registryOf(name);
+            const result = await dockerOutput(["push", name], { timeoutMs: 1_800_000 });
+            if (result.code !== 0) {
+              const message = `${result.stderr}${result.stdout}`;
+              if (needsLogin(message))
+                throw new Error(`${registry} refused the push: it needs a login with the right to push there, and only the person can log in. Ask them to run "${loginCommand(registry)}" in their own terminal, then try again. Nothing was pushed.`);
+              throw new Error(explain(message));
+            }
+            return reply({ image: name, registry, ...forModel(`${result.stdout}${result.stderr}`) });
           }),
       ),
   },

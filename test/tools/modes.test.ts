@@ -9,18 +9,19 @@ describe("modes and areas", () => {
     const tools = await names({ DOCKER_MCP_MODE: "read" });
     assert.ok(tools.length > 10);
     for (const tool of tools) assert.equal(tool.annotations?.readOnlyHint, true, tool.name);
-    assert.ok(!tools.some((t) => t.name === "run_container" || t.name === "lab_up"));
+    assert.ok(!tools.some((t) => ["run_container", "lab_up", "compose_build", "push_image"].includes(t.name)));
+    assert.ok(tools.some((t) => t.name === "container_stats") && tools.some((t) => t.name === "container_processes"));
   });
 
   it("lab mode has the labs and no general writes", async () => {
     const tools = (await names({ DOCKER_MCP_MODE: "lab" })).map((t) => t.name);
-    for (const name of ["lab_up", "lab_exec", "lab_check", "lab_reset", "lab_down", "list_containers"]) assert.ok(tools.includes(name), name);
-    for (const name of ["run_container", "exec_in_container", "compose_up", "prune", "remove_volume", "list_volumes"]) assert.ok(!tools.includes(name), name);
+    for (const name of ["lab_up", "lab_exec", "lab_check", "lab_reset", "lab_down", "list_containers", "container_stats", "container_processes"]) assert.ok(tools.includes(name), name);
+    for (const name of ["run_container", "exec_in_container", "compose_up", "compose_build", "push_image", "prune", "remove_volume", "list_volumes"]) assert.ok(!tools.includes(name), name);
   });
 
   it("full mode has everything, destructive tools marked", async () => {
     const tools = await names({ DOCKER_MCP_MODE: "full" });
-    for (const name of ["run_container", "exec_in_container", "compose_up", "prune", "lab_up", "remove_image"]) assert.ok(tools.some((t) => t.name === name), name);
+    for (const name of ["run_container", "exec_in_container", "compose_up", "compose_build", "push_image", "container_stats", "container_processes", "prune", "lab_up", "remove_image"]) assert.ok(tools.some((t) => t.name === name), name);
     for (const name of ["remove_container", "remove_image", "remove_volume", "prune", "compose_down", "lab_down"]) assert.equal(tools.find((t) => t.name === name)?.annotations?.destructiveHint, true, name);
   });
 

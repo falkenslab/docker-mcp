@@ -24,7 +24,7 @@ docker-mcp is an MCP server that lets an AI agent (Claude Code, Codex, an agent 
 - 🎚️ **Modes, not trust.** A tool outside the mode doesn't exist for the agent: in `read` it can't change anything, in `lab` it can't run anything but labs.
 - 🛡️ **Asks before the dangerous.** Removing anything is marked destructive, and a privileged container, the host's network or the Docker socket needs your explicit yes.
 - 🧪 **Labs for practices.** A folder with a `compose.yaml` and a check: no internet, no host mounts, limits on CPU and memory, refused if it breaks the rules, reset in one call.
-- 🧰 **The whole of Docker.** 43 tools over containers, images, volumes, networks, Compose and the system, each with structured results.
+- 🧰 **The whole of Docker.** 47 tools over containers, images, volumes, networks, Compose and the system, each with structured results.
 - 🔧 **Explains, never installs.** Without Docker, or with it stopped, it says how to install or start it.
 - 📦 **Nothing to install.** One bundled file run with `npx`, for agent-kit, Claude Code and Codex alike.
 
@@ -54,10 +54,10 @@ In an agent built on agent-kit, or with its skills in Claude Code and Codex, ins
 
 | Area | Tools |
 | --- | --- |
-| 📦 Containers | `list_containers`, `inspect_container`, `container_logs`, `run_container`, `start_container`, `stop_container`, `restart_container`, `remove_container`, `exec_in_container`, `copy_to_container`, `copy_from_container` |
-| 🖼️ Images | `list_images`, `inspect_image`, `pull_image`, `build_image`, `tag_image`, `remove_image` |
+| 📦 Containers | `list_containers`, `inspect_container`, `container_logs`, `container_stats`, `container_processes`, `run_container`, `start_container`, `stop_container`, `restart_container`, `remove_container`, `exec_in_container`, `copy_to_container`, `copy_from_container` |
+| 🖼️ Images | `list_images`, `inspect_image`, `pull_image`, `build_image`, `tag_image`, `push_image`, `remove_image` |
 | 💾 Volumes and networks | `list_volumes`, `inspect_volume`, `create_volume`, `remove_volume`, and the same for networks |
-| 🧩 Compose | `compose_ps`, `compose_logs`, `compose_up`, `compose_down`, `compose_exec` |
+| 🧩 Compose | `compose_ps`, `compose_logs`, `compose_build`, `compose_up`, `compose_down`, `compose_exec` |
 | ⚙️ System | `docker_info`, `disk_usage`, `prune` |
 | 🧪 Labs | `list_labs`, `lab_status`, `lab_logs`, `lab_up`, `lab_exec`, `lab_check`, `lab_reset`, `lab_down` |
 | 🔌 Server | `server_info`, `check_requirements` |

@@ -13,9 +13,11 @@ El modo decide qué herramientas existen. Una herramienta que el modo no permite
 
 | Modo | Qué puede hacer el agente |
 | --- | --- |
-| `read` | Solo mirar: listar e inspeccionar contenedores, imágenes, volúmenes y redes, leer logs, el estado de los proyectos de Compose y de los laboratorios, la información de Docker y su uso de disco |
+| `read` | Solo mirar: listar e inspeccionar contenedores, imágenes, volúmenes y redes, leer logs, ver qué consumen y qué ejecutan los contenedores, el estado de los proyectos de Compose y de los laboratorios, la información de Docker y su uso de disco |
 | `lab` | Solo laboratorios: arrancarlos, usarlos, comprobarlos, reiniciarlos y pararlos, con las reglas de abajo; solo ve los contenedores de los laboratorios |
 | `full` (por defecto) | Todo lo que hace Docker. Borrar cualquier cosa se marca como destructivo, así que el agente lo confirma antes, y un contenedor con opciones peligrosas necesita tu sí explícito |
+
+Subir una imagen a un registro usa el login que hiciste tú con `docker login`: el agente nunca te pide tu contraseña ni tu token, y si no hay login te dice qué ejecutar en tu propio terminal.
 
 Las opciones peligrosas son: un contenedor privilegiado, la red, los procesos o el IPC del equipo, capacidades extra, dispositivos, y montar el socket de Docker, la carpeta raíz del equipo o tu carpeta personal. Con cualquiera de ellas, `run_container` se niega hasta que el agente te lo pregunta y vuelve a llamar diciendo que has aceptado.
 

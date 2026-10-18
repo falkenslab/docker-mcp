@@ -17,6 +17,7 @@ src/
 ```
 
 - **Flow**: the client starts `dist/server.mjs`; `createServer()` registers every tool from `TOOLS`; each call validates its input with zod, does its work and returns `reply(...)`.
+- **Domain modules**: `docker.ts` (the CLI, its output and its errors explained), `config.ts`, `labs.ts` and `policy.ts` (ADR-005, ADR-006), `usage.ts` (stats and processes), `registry.ts` (where an image is pushed, and when the person must log in).
 - **The domain's logic** grows in its own modules under `src/` (a client for an API, a parser), never inside a tool file: a tool is a schema, a description, annotations and a call.
 - **Requirements**: with an empty `REQUIREMENTS` there's no `check_requirements` tool; with any, it's registered and `server_info` reports them.
 - **The bundle**: esbuild writes everything into `dist/server.mjs` (ADR-001); `docs/scripts/tools-reference.mjs` lists its tools for the site.

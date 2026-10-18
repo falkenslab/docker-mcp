@@ -7,7 +7,7 @@ sidebar_label: Tools
 
 # Tools
 
-This server has **43 tools**. This page is generated from the server itself, so it lists them exactly as your AI app gets them, with the descriptions the agent reads. You don't call tools yourself: you ask in your own words, and the agent picks them.
+This server has **47 tools**. This page is generated from the server itself, so it lists them exactly as your AI app gets them, with the descriptions the agent reads. You don't call tools yourself: you ask in your own words, and the agent picks them.
 
 | Tool | What it does | Only reads |
 | --- | --- | :-: |
@@ -19,6 +19,8 @@ This server has **43 tools**. This page is generated from the server itself, so 
 | [`list_containers`](#list-containers) | List containers | ✓ |
 | [`inspect_container`](#inspect-container) | Inspect a container | ✓ |
 | [`container_logs`](#container-logs) | A container's logs | ✓ |
+| [`container_stats`](#container-stats) | Containers' resource usage | ✓ |
+| [`container_processes`](#container-processes) | A container's processes | ✓ |
 | [`run_container`](#run-container) | Run a container |  |
 | [`start_container`](#start-container) | Start a container |  |
 | [`stop_container`](#stop-container) | Stop a container |  |
@@ -32,6 +34,7 @@ This server has **43 tools**. This page is generated from the server itself, so 
 | [`pull_image`](#pull-image) | Pull an image |  |
 | [`build_image`](#build-image) | Build an image |  |
 | [`tag_image`](#tag-image) | Tag an image |  |
+| [`push_image`](#push-image) | Push an image |  |
 | [`remove_image`](#remove-image) | Remove an image |  |
 | [`list_volumes`](#list-volumes) | List volumes | ✓ |
 | [`inspect_volume`](#inspect-volume) | Inspect a volume | ✓ |
@@ -43,6 +46,7 @@ This server has **43 tools**. This page is generated from the server itself, so 
 | [`remove_network`](#remove-network) | Remove a network |  |
 | [`compose_ps`](#compose-ps) | A Compose project's services | ✓ |
 | [`compose_logs`](#compose-logs) | A Compose project's logs | ✓ |
+| [`compose_build`](#compose-build) | Build a Compose project |  |
 | [`compose_up`](#compose-up) | Start a Compose project |  |
 | [`compose_down`](#compose-down) | Stop a Compose project |  |
 | [`compose_exec`](#compose-exec) | Run a command in a Compose service |  |
@@ -130,6 +134,26 @@ A container's last log lines (stdout and stderr), 200 by default; the start is l
 | `container` | ✅ | string | The container's name or id, as its list gives it |
 | `tail` |  | integer | How many lines from the end |
 | `since` |  | string | Only since then: a timestamp, or a duration like 10m |
+
+## `container_stats` {#container-stats}
+
+**Containers' resource usage**
+
+What containers consume right now, one snapshot (not a stream): CPU, memory (used, limit, percent), network and disk I/O, and processes. All running containers, or the ones named; a stopped one shows zeros. Use it to answer why the computer is slow or which container uses the most; container_processes shows what runs inside one.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `containers` |  | string list | Only these containers; all running ones when missing |
+
+## `container_processes` {#container-processes}
+
+**A container's processes**
+
+The processes running inside a container (docker top): their user, PID, start time, CPU time and command, with the columns Docker gives. The container must be running.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `container` | ✅ | string | The container's name or id, as its list gives it |
 
 ## `run_container` {#run-container}
 
@@ -293,6 +317,16 @@ Give an image another name and tag (the image itself isn't copied). Confirm with
 | `image` | ✅ | string | The image's name or id, as its list gives it |
 | `tag` | ✅ | string | The new name:tag |
 
+## `push_image` {#push-image}
+
+**Push an image**
+
+Upload a local image to its registry: Docker Hub unless its name starts with another (ghcr.io/owner/name:tag); give it that name first with tag_image. It publishes the image, maybe publicly: confirm with the person first, naming the registry and the tag. It uses the login the person made themselves with docker login; without one, it says what they must run in their own terminal. Never ask for their password or token.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `image` | ✅ | string | The image with its registry, name and tag, e.g. ghcr.io/owner/app:1.0 |
+
 ## `remove_image` {#remove-image}
 
 **Remove an image**
@@ -404,6 +438,20 @@ The last log lines of a Compose project's services (or one), 200 per service by 
 | `file` |  | string | Its compose file, when it isn't the folder's compose.yaml |
 | `service` |  | string |  |
 | `tail` |  | integer |  |
+
+## `compose_build` {#compose-build}
+
+**Build a Compose project**
+
+Build the images of a Compose project's services that have a build (all, or some), without starting anything: to check a Dockerfile change, or to have the images ready. Returns the exit code and the build's output (its end when long); a failed build says why at the end. Uses the network and disk: confirm with the person first.
+
+| Input | Required | Type | Description |
+| --- | :-: | --- | --- |
+| `folder` | ✅ | string | The Compose project's folder (absolute path), where its compose.yaml is |
+| `file` |  | string | Its compose file, when it isn't the folder's compose.yaml |
+| `services` |  | string list | Only these services; all with a build when missing |
+| `noCache` |  | boolean | Build every step again, ignoring the cache |
+| `pull` |  | boolean | Pull newer versions of the base images first |
 
 ## `compose_up` {#compose-up}
 
