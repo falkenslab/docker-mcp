@@ -42,7 +42,13 @@ codex plugin marketplace add falkenslab/agent-kit-extensions
 codex plugin add docker-mcp@falkenslab
 ```
 
-Codex no tiene ajustes de plugins, así que funciona en modo full con la carpeta de laboratorios por defecto.
+Codex no tiene ajustes de plugins, así que funciona en modo full con la carpeta de laboratorios por defecto. Para otro modo, añádelo como un servidor propio:
+
+```bash
+codex mcp add docker --env DOCKER_MCP_MODE=read -- npx -y @falkenslab/docker-mcp
+```
+
+Para escribirlo en `.mcp.json` (Claude Code) o en `config.toml` (Codex), con todos los ajustes, mira [Configuración](configuration.md).
 
 ## Comprobar que funciona
 

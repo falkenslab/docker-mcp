@@ -40,7 +40,7 @@ claude mcp add docker -- npx -y @falkenslab/docker-mcp
 claude mcp add docker -e DOCKER_MCP_MODE=lab -e DOCKER_MCP_LABS_DIR=/path/to/labs -- npx -y @falkenslab/docker-mcp
 ```
 
-In an agent built on agent-kit, or with its skills in Claude Code and Codex, install the `docker-mcp` extension from [agent-kit-extensions](https://github.com/falkenslab/agent-kit-extensions). Then ask: "What containers are running?"
+In Codex, `codex mcp add docker -- npx -y @falkenslab/docker-mcp`. To write it in `.mcp.json` or Codex's `config.toml`, with every setting, see [Configuration](https://falkenslab.github.io/docker-mcp/configuration). In an agent built on agent-kit, or with its skills in Claude Code and Codex, install the `docker-mcp` extension from [agent-kit-extensions](https://github.com/falkenslab/agent-kit-extensions). Then ask: "What containers are running?"
 
 ## 💬 What you can ask
 
@@ -67,6 +67,7 @@ Every tool, with what each mode keeps: [the tools reference](https://falkenslab.
 ## 📚 Documentation
 
 - **[Getting started](https://falkenslab.github.io/docker-mcp/getting-started)**: installing it in your AI app.
+- **[Configuration](https://falkenslab.github.io/docker-mcp/configuration)**: `.mcp.json` for Claude Code and `config.toml` for Codex, or their command lines, with every setting.
 - **[Modes and settings](https://falkenslab.github.io/docker-mcp/modes)**: `read`, `lab` and `full`, the areas, and the labs' policy.
 - **[Tools](https://falkenslab.github.io/docker-mcp/reference/tools)**: every tool, generated from the server.
 
