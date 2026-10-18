@@ -1,0 +1,21 @@
+/* Falken's Lab colors: a warm orange on light pages, a brighter one on dark. */
+:root {
+  --ifm-color-primary: #c2410c;
+  --ifm-color-primary-dark: #af3a0b;
+  --ifm-color-primary-darker: #a5370a;
+  --ifm-color-primary-darkest: #882d08;
+  --ifm-color-primary-light: #d5480d;
+  --ifm-color-primary-lighter: #df4b0e;
+  --ifm-color-primary-lightest: #f15f22;
+  --ifm-code-font-size: 92%;
+}
+
+[data-theme="dark"] {
+  --ifm-color-primary: #f98012;
+  --ifm-color-primary-dark: #ee7206;
+  --ifm-color-primary-darker: #e16c06;
+  --ifm-color-primary-darkest: #b95905;
+  --ifm-color-primary-light: #fa8f2f;
+  --ifm-color-primary-lighter: #fa973e;
+  --ifm-color-primary-lightest: #fbae69;
+}

@@ -1,0 +1,10 @@
+{
+  "item.label.Guide": {
+    "message": "Guía",
+    "description": "Navbar item with label Guide"
+  },
+  "item.label.Tools": {
+    "message": "Herramientas",
+    "description": "Navbar item with label Tools"
+  }
+}
