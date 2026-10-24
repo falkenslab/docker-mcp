@@ -21,6 +21,10 @@ Pushing an image to a registry uses the login you made yourself with `docker log
 
 The dangerous options are: a privileged container, the host's network, processes or IPC, extra capabilities, devices, and mounting the Docker socket, the host's root folder or your home folder. With any of them, `run_container` refuses until the agent has asked you and calls again saying you agreed.
 
+### Trying something isolated
+
+In full mode, `run_container` can also start a single container cut off from your computer, for the agent to try a tool or someone's code without building a lab: no network (`network: "none"`), limits on CPU, memory and processes, a read-only root filesystem, no new privileges, and a label to find it and remove it later (`list_containers` filters by label). A run that waits for its result (`detach: false`) is stopped and removed when its time runs out (`timeoutSeconds`, 600 by default). Ask for it in your own words: "try this in an isolated container".
+
 ## Areas
 
 `DOCKER_MCP_SCOPES` narrows a mode to some areas, comma-separated: `containers`, `images`, `volumes`, `networks`, `compose`, `system`, `labs`. For example, `containers,compose` in full mode keeps only those tools (and `server_info` and `check_requirements`, always there).

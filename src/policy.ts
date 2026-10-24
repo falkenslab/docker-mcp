@@ -1,5 +1,6 @@
-// What's dangerous in a container's options (full mode asks for an explicit confirmation), and lab mode's
-// policy for a lab's compose file: what it refuses, and the override that adds limits and isolation.
+// What's dangerous in a container's options (full mode asks for an explicit confirmation), what isolates a
+// one-off container, and lab mode's policy for a lab's compose file: what it refuses, and the override that
+// adds limits and isolation.
 import { homedir } from "node:os";
 import path from "node:path";
 import { stringify } from "yaml";
@@ -47,6 +48,28 @@ export function dangers(options: ContainerOptions): string[] {
     else if (isHome(source)) found.push(`the person's home folder (${source})`);
   }
   return found;
+}
+
+/** What limits and cuts off one container (#6): the run's options for a try that can't reach the computer. */
+export interface Isolation {
+  cpus?: string;
+  memory?: string;
+  pids?: number;
+  readOnly?: boolean;
+  noNewPrivileges?: boolean;
+  labels?: Record<string, string>;
+}
+
+/** `docker run`'s arguments for an isolation, as a list: limits, a read-only root, no new privileges, labels. */
+export function isolationArgs(isolation: Isolation): string[] {
+  const args: string[] = [];
+  if (isolation.cpus) args.push("--cpus", isolation.cpus);
+  if (isolation.memory) args.push("--memory", isolation.memory);
+  if (isolation.pids) args.push("--pids-limit", String(isolation.pids));
+  if (isolation.readOnly) args.push("--read-only");
+  if (isolation.noNewPrivileges) args.push("--security-opt", "no-new-privileges");
+  for (const [key, value] of Object.entries(isolation.labels ?? {})) args.push("--label", value ? `${key}=${value}` : key);
+  return args;
 }
 
 export class PolicyError extends Error {}

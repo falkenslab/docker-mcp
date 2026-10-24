@@ -112,6 +112,7 @@ List Docker containers, running or not (all unless running is true): id, name, i
 | Entrada | Obligatoria | Tipo | Descripción |
 | --- | :-: | --- | --- |
 | `running` |  | boolean | Only the running ones |
+| `label` |  | string | Only those with this label, "key" or "key=value", e.g. the one run_container gave them |
 
 ## `inspect_container` {#inspect-container}
 
@@ -159,7 +160,7 @@ The processes running inside a container (docker top): their user, PID, start ti
 
 **Run a container**
 
-Create and start a container from an image (pulled if missing), in the background unless detach is false. Dangerous options (privileged, the host's network, processes or IPC, extra capabilities, devices, mounting the Docker socket, the host's root or the person's home) are refused unless confirmedDangerous is true: ask the person first, naming what they give the container. Changes the machine: confirm with the person first.
+Create and start a container from an image (pulled if missing), in the background unless detach is false. Dangerous options (privileged, the host's network, processes or IPC, extra capabilities, devices, mounting the Docker socket, the host's root or the person's home) are refused unless confirmedDangerous is true: ask the person first, naming what they give the container. Changes the machine: confirm with the person first. To try something without it reaching the computer, isolate it: network "none", cpus, memory and pids limits, readOnly, noNewPrivileges, no ports or host folders, and a label to find and remove it later (list_containers filters by label). A foreground run (detach false) is stopped and removed when timeoutSeconds runs out.
 
 | Entrada | Obligatoria | Tipo | Descripción |
 | --- | :-: | --- | --- |
@@ -169,7 +170,7 @@ Create and start a container from an image (pulled if missing), in the backgroun
 | `env` |  | object | Environment variables |
 | `ports` |  | string list | Published ports, "host:container", e.g. "8080:80"; "127.0.0.1:8080:80" to keep them on this computer |
 | `volumes` |  | string list | Mounts, "named-volume:/path" or "/host/path:/path[:ro]" |
-| `network` |  | string | A network to join |
+| `network` |  | string | A network to join; "none" cuts the container off from every network |
 | `workdir` |  | string |  |
 | `detach` |  | boolean | In the background (default); false waits for it to finish and returns its output |
 | `remove` |  | boolean | Remove it when it stops |
@@ -179,6 +180,13 @@ Create and start a container from an image (pulled if missing), in the backgroun
 | `devices` |  | string list |  |
 | `pid` |  | string |  |
 | `ipc` |  | string |  |
+| `cpus` |  | string | At most this many CPUs, e.g. 1 or 0.5 |
+| `memory` |  | string | At most this much memory, e.g. 512m or 1g |
+| `pids` |  | integer | At most this many processes |
+| `readOnly` |  | boolean | Its root filesystem read-only (volumes keep their own mode) |
+| `noNewPrivileges` |  | boolean | Its processes can't gain privileges (setuid, sudo) |
+| `labels` |  | object | Labels to mark it, e.g. &#123; "docker-mcp.sandbox": "try-redis" &#125; |
+| `timeoutSeconds` |  | integer | A foreground run (detach false): stop and remove it after this long; 600 by default |
 | `confirmedDangerous` |  | boolean | The person confirmed the dangerous options, knowing what they give the container |
 
 ## `start_container` {#start-container}

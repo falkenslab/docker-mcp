@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { docker, dockerOutput, forModel, jsonLines } from "../docker.js";
-import { dangers } from "../policy.js";
+import { randomUUID } from "node:crypto";
+import { dangers, isolationArgs } from "../policy.js";
 import { parseStats, parseTop } from "../usage.js";
 import { reply } from "./reply.js";
 import { LABEL, ownedInLab, ref, withDocker } from "./shared.js";
@@ -19,13 +20,17 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
         {
           title: "List containers",
           description: `List Docker containers, running or not (all unless running is true): id, name, image, state, status and ports. ${config.mode === "lab" ? "In lab mode, only the labs' containers. " : ""}Names and ids are what the other container tools take.`,
-          inputSchema: { running: z.boolean().optional().describe("Only the running ones") },
+          inputSchema: {
+            running: z.boolean().optional().describe("Only the running ones"),
+            label: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_./-]*(=[^\s]*)?$/, "a label, key or key=value").optional().describe('Only those with this label, "key" or "key=value", e.g. the one run_container gave them'),
+          },
           outputSchema: { containers: z.array(z.object({ id: z.string(), name: z.string(), image: z.string(), state: z.string(), status: z.string(), ports: z.string() })) },
           annotations: { readOnlyHint: true, openWorldHint: false },
         },
-        async ({ running }) =>
+        async ({ running, label }) =>
           withDocker(async () => {
-            const rows = jsonLines<Record<string, string>>(await docker(["ps", ...(running ? [] : ["-a"]), ...(config.mode === "lab" ? ["--filter", `label=${LABEL}`] : []), "--format", "{{json .}}"]));
+            const filters = [...(config.mode === "lab" ? ["--filter", `label=${LABEL}`] : []), ...(label ? ["--filter", `label=${label}`] : [])];
+            const rows = jsonLines<Record<string, string>>(await docker(["ps", ...(running ? [] : ["-a"]), ...filters, "--format", "{{json .}}"]));
             return reply({ containers: rows.map((r) => ({ id: r.ID ?? "", name: r.Names ?? "", image: r.Image ?? "", state: r.State ?? "", status: r.Status ?? "", ports: r.Ports ?? "" })) });
           }),
       ),
@@ -162,7 +167,7 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
         {
           title: "Run a container",
           description:
-            "Create and start a container from an image (pulled if missing), in the background unless detach is false. Dangerous options (privileged, the host's network, processes or IPC, extra capabilities, devices, mounting the Docker socket, the host's root or the person's home) are refused unless confirmedDangerous is true: ask the person first, naming what they give the container. Changes the machine: confirm with the person first.",
+            "Create and start a container from an image (pulled if missing), in the background unless detach is false. Dangerous options (privileged, the host's network, processes or IPC, extra capabilities, devices, mounting the Docker socket, the host's root or the person's home) are refused unless confirmedDangerous is true: ask the person first, naming what they give the container. Changes the machine: confirm with the person first. To try something without it reaching the computer, isolate it: network \"none\", cpus, memory and pids limits, readOnly, noNewPrivileges, no ports or host folders, and a label to find and remove it later (list_containers filters by label). A foreground run (detach false) is stopped and removed when timeoutSeconds runs out.",
           inputSchema: {
             image: z.string().min(1).describe("The image, e.g. nginx:1.27 or postgres:17"),
             name: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_.-]*$/).optional(),
@@ -170,7 +175,7 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
             env: z.record(z.string(), z.string()).optional().describe("Environment variables"),
             ports: z.array(z.string()).optional().describe('Published ports, "host:container", e.g. "8080:80"; "127.0.0.1:8080:80" to keep them on this computer'),
             volumes: z.array(z.string()).optional().describe('Mounts, "named-volume:/path" or "/host/path:/path[:ro]"'),
-            network: z.string().optional().describe("A network to join"),
+            network: z.string().optional().describe('A network to join; "none" cuts the container off from every network'),
             workdir: z.string().optional(),
             detach: z.boolean().default(true).describe("In the background (default); false waits for it to finish and returns its output"),
             remove: z.boolean().default(false).describe("Remove it when it stops"),
@@ -180,9 +185,16 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
             devices: z.array(z.string()).optional(),
             pid: z.string().optional(),
             ipc: z.string().optional(),
+            cpus: z.string().regex(/^\d+(\.\d+)?$/, "a number of CPUs, e.g. 1 or 0.5").optional().describe("At most this many CPUs, e.g. 1 or 0.5"),
+            memory: z.string().regex(/^\d+[bkmg]?$/i, "an amount like 512m or 1g").optional().describe("At most this much memory, e.g. 512m or 1g"),
+            pids: z.number().int().min(1).max(100_000).optional().describe("At most this many processes"),
+            readOnly: z.boolean().optional().describe("Its root filesystem read-only (volumes keep their own mode)"),
+            noNewPrivileges: z.boolean().optional().describe("Its processes can't gain privileges (setuid, sudo)"),
+            labels: z.record(z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_./-]*$/), z.string()).optional().describe("Labels to mark it, e.g. { \"docker-mcp.sandbox\": \"try-redis\" }"),
+            timeoutSeconds: z.number().int().min(1).max(3600).optional().describe("A foreground run (detach false): stop and remove it after this long; 600 by default"),
             confirmedDangerous: z.boolean().optional().describe("The person confirmed the dangerous options, knowing what they give the container"),
           },
-          outputSchema: { container: z.string().describe("Its id (detached)"), ...output },
+          outputSchema: { container: z.string().describe("Its id (detached), or its name (foreground)"), ...output, timedOut: z.boolean().optional().describe("A foreground run that ran out of time: it was stopped and removed") },
           annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
         },
         async (input) =>
@@ -190,7 +202,9 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
             const found = dangers(input);
             if (found.length && !input.confirmedDangerous)
               throw new Error(`This container would get ${found.join(", ")}. Ask the person whether they want that, and only with their yes call again with confirmedDangerous: true.`);
-            const args = ["run", ...(input.detach ? ["-d"] : []), ...(input.remove ? ["--rm"] : []), ...(input.name ? ["--name", input.name] : [])];
+            // A foreground run gets a name, so it can be stopped and removed when it runs out of time.
+            const name = input.name ?? (input.detach ? undefined : `docker-mcp-run-${randomUUID().slice(0, 8)}`);
+            const args = ["run", ...(input.detach ? ["-d"] : []), ...(input.remove ? ["--rm"] : []), ...(name ? ["--name", name] : [])];
             for (const [key, value] of Object.entries(input.env ?? {})) args.push("-e", `${key}=${value}`);
             for (const port of input.ports ?? []) args.push("-p", port);
             for (const volume of input.volumes ?? []) args.push("-v", volume);
@@ -202,10 +216,14 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
             for (const device of input.devices ?? []) args.push("--device", device);
             if (input.pid) args.push("--pid", input.pid);
             if (input.ipc) args.push("--ipc", input.ipc);
-            args.push(input.image, ...(input.command ?? []));
-            const result = await dockerOutput(args, { timeoutMs: 600_000 });
+            args.push(...isolationArgs(input), input.image, ...(input.command ?? []));
+            const result = await dockerOutput(args, { timeoutMs: input.detach ? 600_000 : (input.timeoutSeconds ?? 600) * 1000 });
             if (result.code !== 0 && input.detach) throw new Error(result.stderr.trim() || "docker run failed");
-            return reply({ container: input.detach ? result.stdout.trim() : "", exitCode: result.code, ...forModel(input.detach ? result.stderr : `${result.stdout}${result.stderr}`) });
+            if (!input.detach && result.timedOut && name) {
+              await dockerOutput(["rm", "-f", name]);
+              return reply({ container: name, exitCode: result.code, timedOut: true, ...forModel(`${result.stdout}${result.stderr}\nIt ran out of time, so ${name} was stopped and removed.`) });
+            }
+            return reply({ container: input.detach ? result.stdout.trim() : (name ?? ""), exitCode: result.code, ...forModel(input.detach ? result.stderr : `${result.stdout}${result.stderr}`) });
           }),
       ),
   },

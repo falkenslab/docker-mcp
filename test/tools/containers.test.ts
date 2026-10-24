@@ -40,6 +40,37 @@ describe("container tools", () => {
     assert.ok(docker.calls[0]?.args.includes("--privileged"));
   });
 
+  it("runs an isolated container: limits, no network, read-only, no new privileges, a label", async () => {
+    docker = fakeDocker([[["run"], { stdout: "c0ffee\n" }]]);
+    await (await connect()).callTool({ name: "run_container", arguments: { image: "redis:7", network: "none", cpus: "0.5", memory: "256m", pids: 64, readOnly: true, noNewPrivileges: true, labels: { "docker-mcp.sandbox": "try-redis" } } });
+    assert.deepEqual(docker.calls[0]?.args, ["run", "-d", "--network", "none", "--cpus", "0.5", "--memory", "256m", "--pids-limit", "64", "--read-only", "--security-opt", "no-new-privileges", "--label", "docker-mcp.sandbox=try-redis", "redis:7"]);
+  });
+
+  it("stops and removes a foreground run that runs out of time", async () => {
+    docker = fakeDocker([[["run"], { code: 137, stdout: "working…\n", timedOut: true }]]);
+    const result = await (await connect()).callTool({ name: "run_container", arguments: { image: "alpine", command: ["sleep", "999"], detach: false, timeoutSeconds: 5 } });
+    const run = docker.calls[0];
+    const name = run?.args[run.args.indexOf("--name") + 1] ?? "";
+    assert.match(name, /^docker-mcp-run-/);
+    assert.equal(run?.options?.timeoutMs, 5000);
+    assert.deepEqual(docker.calls[1]?.args, ["rm", "-f", name]);
+    assert.deepEqual([(result.structuredContent as { timedOut?: boolean }).timedOut, (result.structuredContent as { container: string }).container], [true, name]);
+    assert.match(text(result), /ran out of time/);
+  });
+
+  it("lists only the containers with a label", async () => {
+    docker = fakeDocker();
+    await (await connect()).callTool({ name: "list_containers", arguments: { label: "docker-mcp.sandbox=try-redis" } });
+    assert.deepEqual(docker.calls[0]?.args, ["ps", "-a", "--filter", "label=docker-mcp.sandbox=try-redis", "--format", "{{json .}}"]);
+  });
+
+  it("refuses a label that looks like an option", async () => {
+    docker = fakeDocker();
+    const result = await (await connect()).callTool({ name: "list_containers", arguments: { label: "--all" } });
+    assert.equal(result.isError, true);
+    assert.equal(docker.calls.length, 0);
+  });
+
   it("takes one snapshot of the running containers' usage", async () => {
     docker = fakeDocker([[["stats"], { stdout: '{"BlockIO":"0B / 0B","CPUPerc":"12.00%","Container":"web","ID":"a1","MemPerc":"1.00%","MemUsage":"80MiB / 7.68GiB","Name":"web","NetIO":"1kB / 2kB","PIDs":"4"}\n' }]]);
     const result = await (await connect()).callTool({ name: "container_stats", arguments: {} });

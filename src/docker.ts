@@ -7,6 +7,8 @@ export interface RunResult {
   stdout: string;
   stderr: string;
   code: number;
+  /** It was stopped because it ran out of time. */
+  timedOut?: boolean;
 }
 export interface RunOptions {
   cwd?: string;
@@ -20,17 +22,29 @@ export const spawnDocker: Runner = (args, { cwd, timeoutMs = 120_000 } = {}) =>
     const child = spawn("docker", args, { cwd, windowsHide: true });
     let stdout = "";
     let stderr = "";
-    const timer = setTimeout(() => child.kill(), timeoutMs);
+    let timedOut = false;
+    let settled = false;
+    const settle = (code: number | null) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve({ stdout, stderr: timedOut ? `${stderr}\nStopped after ${Math.round(timeoutMs / 1000)} s.` : stderr, code: code ?? 1, ...(timedOut ? { timedOut: true } : {}) });
+    };
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill();
+    }, timeoutMs);
     child.stdout.on("data", (chunk) => (stdout += chunk));
     child.stderr.on("data", (chunk) => (stderr += chunk));
     child.on("error", (error) => {
       clearTimeout(timer);
-      reject(error);
+      if (!settled) reject(error);
+      settled = true;
     });
-    child.on("close", (code, signal) => {
-      clearTimeout(timer);
-      resolve({ stdout, stderr: signal ? `${stderr}\nStopped after ${Math.round(timeoutMs / 1000)} s.` : stderr, code: code ?? 1 });
-    });
+    // Killed for its time, it answers as soon as it exits: on Windows its output pipes can stay open while
+    // what it started (a foreground container) still runs, and "close" would wait for that.
+    child.on("exit", (code) => timedOut && settle(code));
+    child.on("close", (code) => settle(code));
   });
 
 let runner: Runner = spawnDocker;

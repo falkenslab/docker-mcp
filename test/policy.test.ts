@@ -3,7 +3,7 @@ import { homedir } from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { parse } from "yaml";
-import { bindSource, dangers, labOverride, labProblems } from "../src/policy.js";
+import { bindSource, dangers, isolationArgs, labOverride, labProblems } from "../src/policy.js";
 
 const lab = path.resolve("/labs/web");
 const limits = { allowInternet: false, cpus: "1", memory: "512m", pids: 256 };
@@ -45,4 +45,16 @@ describe("policy", () => {
     assert.deepEqual(override.networks, { default: { internal: true }, back: { internal: true } });
     assert.equal((parse(labOverride(parse("services:\n  web:\n    image: nginx\n"), "web", { ...limits, allowInternet: true })) as Record<string, unknown>).networks, undefined);
   });
+
+  it("turns an isolation into docker run arguments", () => {
+    assert.deepEqual(isolationArgs({ cpus: "0.5", memory: "256m", pids: 64, readOnly: true, noNewPrivileges: true, labels: { "docker-mcp.sandbox": "try", flag: "" } }), [
+      "--cpus", "0.5", "--memory", "256m", "--pids-limit", "64", "--read-only", "--security-opt", "no-new-privileges", "--label", "docker-mcp.sandbox=try", "--label", "flag",
+    ]);
+    assert.deepEqual(isolationArgs({}), []);
+  });
+
+  it("doesn't count cutting a container off as dangerous", () => {
+    assert.deepEqual(dangers({ network: "none" }), []);
+  });
 });
+

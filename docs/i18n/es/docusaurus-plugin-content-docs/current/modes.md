@@ -21,6 +21,10 @@ Subir una imagen a un registro usa el login que hiciste tú con `docker login`: 
 
 Las opciones peligrosas son: un contenedor privilegiado, la red, los procesos o el IPC del equipo, capacidades extra, dispositivos, y montar el socket de Docker, la carpeta raíz del equipo o tu carpeta personal. Con cualquiera de ellas, `run_container` se niega hasta que el agente te lo pregunta y vuelve a llamar diciendo que has aceptado.
 
+### Probar algo aislado
+
+En modo full, `run_container` también puede arrancar un solo contenedor aislado de tu ordenador, para que el agente pruebe una herramienta o el código de alguien sin montar un laboratorio: sin red (`network: "none"`), con límites de CPU, memoria y procesos, el sistema de ficheros raíz de solo lectura, sin privilegios nuevos y con una etiqueta para encontrarlo y borrarlo después (`list_containers` filtra por etiqueta). Si se espera a su resultado (`detach: false`), se para y se borra cuando se le acaba el tiempo (`timeoutSeconds`, 600 por defecto). Pídelo con tus palabras: «prueba esto en un contenedor aislado».
+
 ## Áreas
 
 `DOCKER_MCP_SCOPES` reduce un modo a algunas áreas, separadas por comas: `containers`, `images`, `volumes`, `networks`, `compose`, `system`, `labs`. Por ejemplo, `containers,compose` en modo full deja solo esas herramientas (más `server_info` y `check_requirements`, que siempre están).
