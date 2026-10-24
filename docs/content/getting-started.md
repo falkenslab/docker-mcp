@@ -50,6 +50,21 @@ codex mcp add docker --env DOCKER_MCP_MODE=read -- npx -y @falkenslab/docker-mcp
 
 To write it in `.mcp.json` (Claude Code) or `config.toml` (Codex) instead, with every setting, see [Configuration](configuration.md).
 
+## With Podman instead of Docker
+
+docker-mcp drives Docker's command line, so with Podman it works through Podman's Docker-compatible socket: install the Docker CLI and its Compose plugin (only the client, not Docker's engine) and point them at Podman.
+
+- **Podman Desktop** (Windows, macOS, Linux): turn on its Docker compatibility in the settings; it points the Docker CLI at Podman for you.
+- **Podman on Linux**: start its socket with `systemctl --user enable --now podman.socket` and set `DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock`.
+- **A Podman machine** (Windows, macOS): `podman machine start` prints the socket or pipe it listens on; use it as `DOCKER_HOST`.
+
+When `DOCKER_HOST` is how it's pointed, docker-mcp needs it too: `-e DOCKER_HOST=…` with `claude mcp add`, in `env` in `.mcp.json`, or `env_vars = ["DOCKER_HOST"]` in Codex (see [Configuration](configuration.md)). Run `docker version` first: it should show Podman as the server.
+
+Two limits:
+
+- The `podman` command itself under the name `docker` (the `podman-docker` package) doesn't work: its output differs from Docker's, and docker-mcp reads Docker's.
+- Labs haven't been tried under Podman yet. Rootless Podman applies the labs' CPU, memory and process limits only on cgroups v2 with those controllers delegated to your user, and often only memory and processes are.
+
 ## Checking it works
 
 Ask the agent: "Is Docker running, and which mode are you in?" It calls `check_requirements` and `server_info`.

@@ -50,6 +50,21 @@ codex mcp add docker --env DOCKER_MCP_MODE=read -- npx -y @falkenslab/docker-mcp
 
 Para escribirlo en `.mcp.json` (Claude Code) o en `config.toml` (Codex), con todos los ajustes, mira [Configuración](configuration.md).
 
+## Con Podman en lugar de Docker
+
+docker-mcp maneja la línea de órdenes de Docker, así que con Podman funciona a través del socket compatible con Docker de Podman: instala el CLI de Docker y su plugin de Compose (solo el cliente, no el motor de Docker) y apúntalos a Podman.
+
+- **Podman Desktop** (Windows, macOS, Linux): activa su compatibilidad con Docker en los ajustes; apunta el CLI de Docker a Podman por ti.
+- **Podman en Linux**: arranca su socket con `systemctl --user enable --now podman.socket` y define `DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock`.
+- **Una máquina de Podman** (Windows, macOS): `podman machine start` muestra el socket o la tubería en la que escucha; úsalo como `DOCKER_HOST`.
+
+Si lo apuntas con `DOCKER_HOST`, docker-mcp también lo necesita: `-e DOCKER_HOST=…` con `claude mcp add`, en `env` en `.mcp.json`, o `env_vars = ["DOCKER_HOST"]` en Codex (mira [Configuración](configuration.md)). Ejecuta antes `docker version`: debería mostrar Podman como servidor.
+
+Dos límites:
+
+- El propio comando `podman` con el nombre `docker` (el paquete `podman-docker`) no funciona: su salida es distinta de la de Docker, y docker-mcp lee la de Docker.
+- Los laboratorios aún no se han probado con Podman. Podman sin root aplica sus límites de CPU, memoria y procesos solo con cgroups v2 y esos controladores delegados a tu usuario, y a menudo solo lo están la memoria y los procesos.
+
 ## Comprobar que funciona
 
 Pregunta al agente: «¿Está Docker en marcha, y en qué modo estás?». Llamará a `check_requirements` y a `server_info`.

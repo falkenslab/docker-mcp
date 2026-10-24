@@ -23,21 +23,17 @@ What the server calls: `ps`, `inspect`, `logs`, `run`, `start/stop/restart/rm`, 
 - **Not confirmed:** internal networks (`internal: true`, no internet for labs) and `no-new-privileges` under rootless Podman, and its labels with `--filter label=`. They need a real Podman.
 - **A cheaper path:** Podman serves a Docker-compatible API socket (`podman system service`, or Podman Desktop's Docker compatibility). The Docker CLI and `docker compose` pointed at it (`DOCKER_HOST=unix:///run/user/<uid>/podman/podman.sock`) produce Docker's own JSON, so the server would work unchanged; what would remain is documenting it and checking the lab policy (limits, internal networks) on that socket.
 
-## Options for the owner
+## Decision
 
-- **A. Document the socket path** (no code): "Podman works through its Docker-compatible socket, with the Docker CLI installed"; labs only where cgroups v2 delegates `cpu`, `memory` and `pids`. Needs one real check of the lab policy.
-- **B. A `DOCKER_MCP_ENGINE=podman` setting**: a second parser for each list, inspect, stats and system tool, `podman-compose` differences, its own requirement and an ADR. Several days of work, and labs still depend on cgroups.
-- **C. Not now**: close the issue explaining the socket path for whoever needs it.
+Option A, chosen by the owner on 2026-10-24 (of A, document the socket path; B, a `DOCKER_MCP_ENGINE` setting; C, not now): Podman through its Docker-compatible socket, with the Docker CLI, and no engine setting or second parser.
 
 ## Changes
 
-- Investigate first, with a real Podman: which tools work as they are with `podman` as the program, and what differs, area by area.
-- Write the findings for the owner: what works, what needs changes, what can't work.
-- Decide with the owner whether it's worth it, and in which modes.
-- If yes: a setting (`DOCKER_MCP_ENGINE=podman`, read with `setting()`), its own requirement in `REQUIREMENTS` and the extension's `plugin.json`, the differences handled in the domain modules, and an ADR.
+- Done: "With Podman instead of Docker" in Getting started, both languages: Podman Desktop's Docker compatibility, the Linux socket and `DOCKER_HOST`, a Podman machine, passing `DOCKER_HOST` to the server, and the two limits (`podman-docker` doesn't work; labs not tried yet, and rootless limits need cgroups v2 delegation).
+- Pending: one real check with Podman on that socket, of what labs rely on: the override's `cpus`, `mem_limit` and `pids_limit`, `no-new-privileges`, internal networks (no internet), and `--filter label=` for lab mode's containers. Then the docs say what holds.
 
 ## Acceptance
 
-- The owner has the findings and has decided.
-- If supported: the tools that differ are tested with a fake Podman, lab mode's policy holds under it, the `verify` skill passes, and the docs say how to choose the engine in both languages.
-- If not: the issue is closed saying why, and this note is deleted.
+- The docs describe the socket path in both languages (done).
+- A lab runs under Podman with its limits and without internet, and lab mode sees only its containers; or the docs say plainly what doesn't hold.
+- Then the issue is closed with what was checked, and this note is deleted.
