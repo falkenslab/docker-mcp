@@ -1,6 +1,6 @@
 {
   "name": "@falkenslab/docker-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Docker for AI agents: a complete set of tools, with modes chosen at startup (read, lab, full).",
   "license": "MIT",
   "author": "Falken's Lab",
