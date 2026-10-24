@@ -30,7 +30,8 @@ Option A, chosen by the owner on 2026-10-24 (of A, document the socket path; B, 
 ## Changes
 
 - Done: "With Podman instead of Docker" in Getting started, both languages: Podman Desktop's Docker compatibility, the Linux socket and `DOCKER_HOST`, a Podman machine, passing `DOCKER_HOST` to the server, and the two limits (`podman-docker` doesn't work; labs not tried yet, and rootless limits need cgroups v2 delegation).
-- Pending: one real check with Podman on that socket, of what labs rely on: the override's `cpus`, `mem_limit` and `pids_limit`, `no-new-privileges`, internal networks (no internet), and `--filter label=` for lab mode's containers. Then the docs say what holds.
+- Ready: `npm run check:labs` (after `npm run build`) checks all of it against whatever engine the Docker CLI points at; all 7 checks hold on Docker 29.
+- Pending: one real check with Podman on that socket, of what labs rely on: the override's `cpus`, `mem_limit` and `pids_limit`, `no-new-privileges`, internal networks (no internet), and `--filter label=` for lab mode's containers. Run `npm run check:labs` with the Docker CLI pointed at Podman; then the docs say what holds.
 
 ## Acceptance
 

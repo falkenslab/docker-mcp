@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm install`, then `npm run build` writes `dist/server.mjs`, the whole server in one file (ADR-001).
 - `npm run typecheck`, `npm run lint`, `npm test` (all tests), `npm test -- test/requirements.test.ts` (one file).
 - `npm run check` starts the bundle and checks its `tools/list` strictly: every tool with a title, a description, both schemas and `readOnlyHint`.
+- `npm run check:labs` starts a throwaway lab on the engine the Docker CLI points at (Docker, or Podman through its socket) and checks what labs rely on: limits, no new privileges, no internet, only the labs' containers seen.
 - `npm run inspect` opens the MCP Inspector on the bundle.
 - Docs: `cd docs && npm install`, `npm run tools` (the tools reference from the bundle; build the server first), `npm start` (English) or `npm run start:es`, `npm run build`.
 - Releasing: bump the version, update `docs/content/releases.md` and its Spanish page, commit, tag `v<x.y.z>`, push; the owner runs `npm publish` (`prepublishOnly` runs every check). Then pin the new version in docker-lab's `.mcp.json` in agent-extensions.
