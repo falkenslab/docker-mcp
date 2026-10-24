@@ -9,11 +9,11 @@ You need [Node.js](https://nodejs.org) 20 or later and [Docker](https://docs.doc
 
 ## In an agent built on agent-kit
 
-Install its extension from Falken's Lab's marketplace, which runs this server at a fixed version, asks for its mode when you install it, and adds the skills to use it well:
+Install its extension, `docker-lab`, from [Falken's Lab's marketplace](https://falkenslab.github.io/agent-extensions/). It uses Docker as a lab where the agent runs and tries software without touching your computer: it runs this server at a fixed version, asks for its mode when you install it, and adds the skills to use it well:
 
 ```bash
-my-agent extension marketplace add falkenslab/agent-kit-extensions
-my-agent extension add docker-mcp@falkenslab
+my-agent extension marketplace add falkenslab/agent-extensions
+my-agent extension add docker-lab@falkenslab
 ```
 
 ## In Claude Code
@@ -31,15 +31,15 @@ claude mcp add docker -e DOCKER_MCP_MODE=read -- npx -y @falkenslab/docker-mcp
 Or, with its skills, as a plugin from the same marketplace:
 
 ```bash
-claude plugin marketplace add falkenslab/agent-kit-extensions
-claude plugin install docker-mcp@falkenslab
+claude plugin marketplace add falkenslab/agent-extensions
+claude plugin install docker-lab@falkenslab
 ```
 
 ## In Codex
 
 ```bash
-codex plugin marketplace add falkenslab/agent-kit-extensions
-codex plugin add docker-mcp@falkenslab
+codex plugin marketplace add falkenslab/agent-extensions
+codex plugin add docker-lab@falkenslab
 ```
 
 Codex has no plugin settings, so it runs in full mode with the default labs folder. For another mode, add it as a server of its own:

@@ -23,7 +23,7 @@ Counts as visible: a tool added, removed or renamed; a tool's inputs, outputs, a
 | --- | --- |
 | A tool added, removed or changed | Its description (that's what agents read), then `npm run tools` in `docs/` after `npm run build` at the root: it regenerates the reference in both languages; any page that explains it, and tool counts (`grep -rn "tools" docs/content docs/i18n README.md`) |
 | A setting | The site's page for settings, the README's quick start if it's needed to start, `server_info` |
-| A requirement | `getting-started` in both languages, and the extension's `plugin.json` in agent-kit-extensions |
+| A requirement | `getting-started` in both languages, and docker-lab's `plugin.json` in agent-extensions |
 | Usage rules for agents | `src/instructions.ts` (and its test) |
 | A new piece of the server (a module, a client) | `.minispec/core/architecture.md` |
 | Build, stack, commands | `.minispec/core/stack.md`, `CLAUDE.md`'s commands |

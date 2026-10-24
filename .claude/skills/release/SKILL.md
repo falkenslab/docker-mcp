@@ -1,6 +1,6 @@
 ---
 name: release
-description: Cut a docker-mcp release - decide the semver bump from the commits since the last tag, bump the version, write the release notes in the docs, commit, tag, push and create the GitHub release; the owner publishes to npm, then the extension in agent-kit-extensions pins the new version. Only when the owner explicitly asks to release or publish.
+description: Cut a docker-mcp release - decide the semver bump from the commits since the last tag, bump the version, write the release notes in the docs, commit, tag, push and create the GitHub release; the owner publishes to npm, then the extension in agent-extensions (docker-lab) pins the new version. Only when the owner explicitly asks to release or publish.
 disable-model-invocation: true
 ---
 
@@ -48,4 +48,4 @@ Ask the owner to run `npm publish` themselves (with their one-time code; `prepub
 
 ## 6. Pin it in the extension
 
-Once `npm view @falkenslab/docker-mcp version` shows it, the extension in agent-kit-extensions pins it: `npx -y @falkenslab/docker-mcp@X.Y.Z` in its `.mcp.json`, and its `plugin.json` requirements copied from `src/requirements.ts` if they changed. That's a change in that repository, from its own session unless the owner asks for it here. Report the version, tag, release URL and npm page.
+Once `npm view @falkenslab/docker-mcp version` shows it, the extension in agent-extensions (docker-lab) pins it: `npx -y @falkenslab/docker-mcp@X.Y.Z` in its `.mcp.json`, and its `plugin.json` requirements copied from `src/requirements.ts` if they changed. That's a change in that repository, from its own session unless the owner asks for it here. Report the version, tag, release URL and npm page.

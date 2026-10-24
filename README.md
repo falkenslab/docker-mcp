@@ -40,7 +40,7 @@ claude mcp add docker -- npx -y @falkenslab/docker-mcp
 claude mcp add docker -e DOCKER_MCP_MODE=lab -e DOCKER_MCP_LABS_DIR=/path/to/labs -- npx -y @falkenslab/docker-mcp
 ```
 
-In Codex, `codex mcp add docker -- npx -y @falkenslab/docker-mcp`. To write it in `.mcp.json` or Codex's `config.toml`, with every setting, see [Configuration](https://falkenslab.github.io/docker-mcp/configuration). In an agent built on agent-kit, or with its skills in Claude Code and Codex, install the `docker-mcp` extension from [agent-kit-extensions](https://github.com/falkenslab/agent-kit-extensions). Then ask: "What containers are running?"
+In Codex, `codex mcp add docker -- npx -y @falkenslab/docker-mcp`. To write it in `.mcp.json` or Codex's `config.toml`, with every setting, see [Configuration](https://falkenslab.github.io/docker-mcp/configuration). In an agent built on agent-kit, or with its skills in Claude Code and Codex, install the `docker-lab` extension from [agent-extensions](https://github.com/falkenslab/agent-extensions), which runs this server at a fixed version. Then ask: "What containers are running?"
 
 ## 💬 What you can ask
 

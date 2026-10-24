@@ -19,7 +19,7 @@ Copy the shape of `src/tools/serverInfo.ts`: one file in `src/tools/`, exporting
 - **Schemas** with zod: every input `.describe()`d for an agent; an `outputSchema` matching what the handler returns. No nullable types and no unions of types: an optional field instead, which every client accepts.
 - **Annotations**, always: `readOnlyHint: true` only when it changes nothing (agent-kit's plan mode calls those); for writes `readOnlyHint: false` plus `destructiveHint` and `idempotentHint`; `openWorldHint: true` when it talks to anything outside the machine.
 - **Handler**: `async (input) => reply(await doTheWork(input))`. Long lists take `limit` and `offset` and return `more`.
-- **A program installed apart** (Docker, ffmpeg…): add it to `REQUIREMENTS` in `src/requirements.ts` and start the handler with `await needs("<program>")` (ADR-004). Copy the requirement into the extension's `plugin.json` in agent-kit-extensions (`metadata["agent-kit"].requirements`).
+- **A program installed apart** (Docker, ffmpeg…): add it to `REQUIREMENTS` in `src/requirements.ts` and start the handler with `await needs("<program>")` (ADR-004). Copy the requirement into the extension's `plugin.json` in agent-extensions (docker-lab) (`metadata["agent-kit"].requirements`).
 - **Settings**: `setting("<VARIABLE>")` from `src/settings.ts`, never `process.env`. A required one that's missing (or arrived as an unexpanded `${user_config.*}`, as in Codex) makes the tool fail with what to set and how, never the server at startup.
 - **State or caches**: under `dataDir()`. Logs: stderr only.
 
