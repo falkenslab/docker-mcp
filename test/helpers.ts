@@ -1,5 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { type ElicitRequest, ElicitRequestSchema, type ElicitResult } from "@modelcontextprotocol/sdk/types.js";
 import { type Config, loadConfig } from "../src/config.js";
 import { createServer } from "../src/createServer.js";
 import { type RunOptions, type RunResult, useRunner } from "../src/docker.js";
@@ -7,10 +8,14 @@ import { type RunOptions, type RunResult, useRunner } from "../src/docker.js";
 /** A configuration from made-up settings, as the server would read them. */
 export const testConfig = (env: Record<string, string> = {}): Config => loadConfig({ ...env, CLAUDE_PLUGIN_DATA: env.CLAUDE_PLUGIN_DATA ?? "/tmp/docker-mcp-test" });
 
-/** The server, connected in memory to a client. */
-export async function connect(config: Config = testConfig()) {
+/** What a client that supports elicitation answers when the server asks the person (ADR-007). */
+export type Elicit = (params: ElicitRequest["params"]) => ElicitResult | Promise<ElicitResult>;
+
+/** The server, connected in memory to a client; with `elicit`, a client that can ask the person and answers so. */
+export async function connect(config: Config = testConfig(), elicit?: Elicit) {
   const server = createServer(config);
-  const client = new Client({ name: "test", version: "0.0.0" });
+  const client = new Client({ name: "test", version: "0.0.0" }, elicit ? { capabilities: { elicitation: {} } } : {});
+  if (elicit) client.setRequestHandler(ElicitRequestSchema, (request) => elicit(request.params));
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
   return client;

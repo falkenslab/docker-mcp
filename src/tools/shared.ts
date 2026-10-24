@@ -7,6 +7,9 @@ import { needs } from "../requirements.js";
 
 export const LABEL = "falkenslab.docker-mcp";
 
+/** What a tool that asks the person (ADR-007) says in its description. */
+export const ASKS = "The server asks the person to confirm it, naming what goes; if they say no, nothing is done.";
+
 /** A container, image, volume or network as Docker names it: an id or a name, never an option. */
 export const ref = (what: string) =>
   z

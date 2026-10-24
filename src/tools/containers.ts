@@ -4,7 +4,8 @@ import { randomUUID } from "node:crypto";
 import { dangers, isolationArgs } from "../policy.js";
 import { parseStats, parseTop } from "../usage.js";
 import { reply } from "./reply.js";
-import { LABEL, ownedInLab, ref, withDocker } from "./shared.js";
+import { ASKS, LABEL, ownedInLab, ref, withDocker } from "./shared.js";
+import { confirm } from "../confirm.js";
 import { ALL_MODES, FULL, type ToolEntry } from "./types.js";
 
 const container = ref("container");
@@ -161,13 +162,13 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
   {
     area: "containers",
     modes: FULL,
-    register: (server) =>
+    register: (server, { config }) =>
       server.registerTool(
         "run_container",
         {
           title: "Run a container",
           description:
-            "Create and start a container from an image (pulled if missing), in the background unless detach is false. Dangerous options (privileged, the host's network, processes or IPC, extra capabilities, devices, mounting the Docker socket, the host's root or the person's home) are refused unless confirmedDangerous is true: ask the person first, naming what they give the container. Changes the machine: confirm with the person first. To try something without it reaching the computer, isolate it: network \"none\", cpus, memory and pids limits, readOnly, noNewPrivileges, no ports or host folders, and a label to find and remove it later (list_containers filters by label). A foreground run (detach false) is stopped and removed when timeoutSeconds runs out.",
+            "Create and start a container from an image (pulled if missing), in the background unless detach is false. Changes the machine: confirm with the person first. With dangerous options (privileged, the host's network, processes or IPC, extra capabilities, devices, mounting the Docker socket, the host's root or the person's home), the server also asks the person itself, saying what each gives the container; if they say no, it isn't run. To try something without it reaching the computer, isolate it: network \"none\", cpus, memory and pids limits, readOnly, noNewPrivileges, no ports or host folders, and a label to find and remove it later (list_containers filters by label). A foreground run (detach false) is stopped and removed when timeoutSeconds runs out.",
           inputSchema: {
             image: z.string().min(1).describe("The image, e.g. nginx:1.27 or postgres:17"),
             name: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_.-]*$/).optional(),
@@ -192,7 +193,6 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
             noNewPrivileges: z.boolean().optional().describe("Its processes can't gain privileges (setuid, sudo)"),
             labels: z.record(z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_./-]*$/), z.string()).optional().describe("Labels to mark it, e.g. { \"docker-mcp.sandbox\": \"try-redis\" }"),
             timeoutSeconds: z.number().int().min(1).max(3600).optional().describe("A foreground run (detach false): stop and remove it after this long; 600 by default"),
-            confirmedDangerous: z.boolean().optional().describe("The person confirmed the dangerous options, knowing what they give the container"),
           },
           outputSchema: { container: z.string().describe("Its id (detached), or its name (foreground)"), ...output, timedOut: z.boolean().optional().describe("A foreground run that ran out of time: it was stopped and removed") },
           annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
@@ -200,8 +200,8 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
         async (input) =>
           withDocker(async () => {
             const found = dangers(input);
-            if (found.length && !input.confirmedDangerous)
-              throw new Error(`This container would get ${found.join(", ")}. Ask the person whether they want that, and only with their yes call again with confirmedDangerous: true.`);
+            if (found.length)
+              await confirm(server, config, { question: `Run a container from ${input.image} with these dangerous options?`, details: found, action: `running ${input.image} with ${found.join(", ")}` });
             // A foreground run gets a name, so it can be stopped and removed when it runs out of time.
             const name = input.name ?? (input.detach ? undefined : `docker-mcp-run-${randomUUID().slice(0, 8)}`);
             const args = ["run", ...(input.detach ? ["-d"] : []), ...(input.remove ? ["--rm"] : []), ...(name ? ["--name", name] : [])];
@@ -252,18 +252,23 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
   {
     area: "containers",
     modes: FULL,
-    register: (server) =>
+    register: (server, { config }) =>
       server.registerTool(
         "remove_container",
         {
           title: "Remove a container",
-          description: "Remove a container, with force to stop it first if it's running, and with volumes to remove its anonymous volumes. Its data is gone: confirm with the person first, naming it.",
+          description: "Remove a container, with force to stop it first if it's running, and with volumes to remove its anonymous volumes. Its data is gone. " + ASKS,
           inputSchema: { container, force: z.boolean().default(false), volumes: z.boolean().default(false) },
           outputSchema: { removed: z.string() },
           annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
         },
         async ({ container: id, force, volumes }) =>
           withDocker(async () => {
+            await confirm(server, config, {
+              question: `Remove the container ${id}?`,
+              details: ["Whatever it wrote inside is gone.", ...(force ? ["If it's running, it's stopped first."] : []), ...(volumes ? ["Its anonymous volumes and their data go too."] : [])],
+              action: `removing the container ${id}`,
+            });
             await docker(["rm", ...(force ? ["-f"] : []), ...(volumes ? ["-v"] : []), id]);
             return reply({ removed: id });
           }),

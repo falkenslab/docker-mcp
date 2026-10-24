@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { docker, forModel, jsonLines } from "../docker.js";
 import { reply } from "./reply.js";
-import { withDocker } from "./shared.js";
+import { ASKS, withDocker } from "./shared.js";
+import { confirm } from "../confirm.js";
+import { pruneEstimate } from "../usage.js";
 import { ALL_MODES, FULL, type ToolEntry } from "./types.js";
 
 export const SYSTEM_TOOLS: ToolEntry[] = [
@@ -67,13 +69,13 @@ export const SYSTEM_TOOLS: ToolEntry[] = [
   {
     area: "system",
     modes: FULL,
-    register: (server) =>
+    register: (server, { config }) =>
       server.registerTool(
         "prune",
         {
           title: "Clean up Docker",
           description:
-            "Remove what isn't in use: stopped containers, dangling images (all unused ones with allImages), unused networks, unused volumes (only when volumes is true: their data is gone) and the build cache. Says how much space it freed. Can't be undone: confirm with the person first, naming what goes.",
+            "Remove what isn't in use: stopped containers, dangling images (all unused ones with allImages), unused networks, unused volumes (only when volumes is true: their data is gone) and the build cache. Says how much space it freed. Can't be undone. " + ASKS,
           inputSchema: {
             what: z.enum(["containers", "images", "networks", "volumes", "build-cache", "everything"]).describe("everything: containers, networks, dangling images and build cache (volumes only with volumes: true)"),
             allImages: z.boolean().default(false).describe("Images: every unused one, not only the dangling ones"),
@@ -84,6 +86,9 @@ export const SYSTEM_TOOLS: ToolEntry[] = [
         },
         async ({ what, allImages, volumes }) =>
           withDocker(async () => {
+            const df = await docker(["system", "df", "--format", "{{json .}}"]).catch(() => "");
+            const kinds = what === "everything" ? `stopped containers, unused networks, ${allImages ? "unused" : "dangling"} images and the build cache${volumes ? ", and unused volumes with their data" : ""}` : what === "volumes" ? "unused volumes and their data" : what === "images" && allImages ? "every unused image" : what === "images" ? "dangling images" : what === "containers" ? "stopped containers" : what === "networks" ? "unused networks" : "the build cache";
+            await confirm(server, config, { question: `Clean up Docker: remove ${kinds}?`, details: [...pruneEstimate(df, what, volumes), "It can't be undone."], action: `removing ${kinds}` });
             const args =
               what === "everything"
                 ? ["system", "prune", "-f", ...(allImages ? ["-a"] : []), ...(volumes ? ["--volumes"] : [])]

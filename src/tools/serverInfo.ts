@@ -12,13 +12,14 @@ export const registerServerInfo: RegisterTool = (server, { config }) => {
     "server_info",
     {
       title: "Server info",
-      description: "Show this server's name, version, mode (read, lab or full) and areas, its labs and data folders, and whether Docker is there. Contains no secrets.",
+      description: "Show this server's name, version, mode (read, lab or full) and areas, who confirms removals and dangerous options, its labs and data folders, and whether Docker is there. Contains no secrets.",
       inputSchema: {},
       outputSchema: {
         name: z.string(),
         version: z.string(),
         mode: z.string().describe("read: only reads; lab: only labs, under a safety policy; full: everything"),
         areas: z.array(z.string()),
+        confirm: z.string().describe("Who confirms removals and dangerous options: server (it asks the person) or client (the app asks before each call)"),
         labsDir: z.string(),
         dataDir: z.string().describe("Where it keeps its state and caches"),
         node: z.string(),
@@ -33,6 +34,7 @@ export const registerServerInfo: RegisterTool = (server, { config }) => {
         version: PACKAGE_VERSION,
         mode: config.mode,
         areas: config.areas,
+        confirm: config.confirm,
         labsDir: config.labsDir,
         dataDir: dataDir(),
         node: process.version,

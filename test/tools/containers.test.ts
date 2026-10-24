@@ -28,16 +28,43 @@ describe("container tools", () => {
     assert.deepEqual(docker.calls[0]?.args, ["run", "-d", "--name", "web", "-e", "A=1; rm -rf /", "-p", "127.0.0.1:8080:80", "nginx:1.27", "nginx", "-g", "daemon off;"]);
   });
 
-  it("refuses dangerous options until the person confirms them", async () => {
+  it("asks the person before dangerous options, saying what each gives the container", async () => {
     docker = fakeDocker();
-    const client = await connect();
-    const refused = await client.callTool({ name: "run_container", arguments: { image: "alpine", privileged: true, volumes: ["/var/run/docker.sock:/var/run/docker.sock"] } });
-    assert.equal(refused.isError, true);
-    assert.match(text(refused), /privileged.*Docker socket.*confirmedDangerous/s);
-    assert.equal(docker.calls.length, 0);
-    const confirmed = await client.callTool({ name: "run_container", arguments: { image: "alpine", privileged: true, confirmedDangerous: true } });
-    assert.notEqual(confirmed.isError, true);
+    const asked: string[] = [];
+    const client = await connect(testConfig(), (params) => {
+      asked.push(params.message);
+      return { action: "accept", content: { confirm: true } };
+    });
+    const result = await client.callTool({ name: "run_container", arguments: { image: "alpine", privileged: true, volumes: ["/var/run/docker.sock:/var/run/docker.sock"] } });
+    assert.notEqual(result.isError, true);
+    assert.match(asked[0] ?? "", /alpine.*privileged.*Docker socket \(control of every container/s);
     assert.ok(docker.calls[0]?.args.includes("--privileged"));
+  });
+
+  it("doesn't run them when the person says no, and tells the model", async () => {
+    docker = fakeDocker();
+    const client = await connect(testConfig(), () => ({ action: "accept", content: { confirm: false } }));
+    const result = await client.callTool({ name: "run_container", arguments: { image: "alpine", privileged: true } });
+    assert.equal(result.isError, true);
+    assert.match(text(result), /said no.*nothing was changed/);
+    assert.equal(docker.calls.length, 0);
+    const declined = await (await connect(testConfig(), () => ({ action: "decline" }))).callTool({ name: "run_container", arguments: { image: "alpine", privileged: true } });
+    assert.equal(declined.isError, true);
+  });
+
+  it("asks nothing for a container without dangerous options", async () => {
+    docker = fakeDocker([[["run"], { stdout: "c0ffee\n" }]]);
+    let asked = false;
+    await (await connect(testConfig(), () => ((asked = true), { action: "accept", content: { confirm: true } }))).callTool({ name: "run_container", arguments: { image: "nginx" } });
+    assert.equal(asked, false);
+  });
+
+  it("ignores the old confirmedDangerous: only the person's answer counts", async () => {
+    docker = fakeDocker();
+    const result = await (await connect()).callTool({ name: "run_container", arguments: { image: "alpine", privileged: true, confirmedDangerous: true } });
+    assert.equal(result.isError, true);
+    assert.match(text(result), /can't ask the person.*DOCKER_MCP_CONFIRM=client/s);
+    assert.equal(docker.calls.length, 0);
   });
 
   it("runs an isolated container: limits, no network, read-only, no new privileges, a label", async () => {

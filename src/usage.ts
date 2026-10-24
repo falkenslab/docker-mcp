@@ -55,3 +55,20 @@ export function parseTop(output: string): { columns: string[]; processes: Record
   });
   return { columns, processes };
 }
+
+const PRUNED: Record<string, string[]> = {
+  containers: ["Containers"],
+  images: ["Images"],
+  volumes: ["Local Volumes"],
+  "build-cache": ["Build Cache"],
+  networks: [],
+  everything: ["Containers", "Images", "Build Cache"],
+};
+
+/** What a prune would free, from `docker system df --format '{{json .}}'`: one line per kind, "Images: up to 1.2GB". */
+export function pruneEstimate(df: string, what: string, volumes: boolean): string[] {
+  const types = [...(PRUNED[what] ?? []), ...(what === "everything" && volumes ? ["Local Volumes"] : [])];
+  return jsonLines<Record<string, string>>(df)
+    .filter((row) => types.includes(row.Type ?? ""))
+    .map((row) => `${row.Type}: up to ${(row.Reclaimable ?? "0B").replace(/\s*\(.*\)$/, "")} could be freed`);
+}

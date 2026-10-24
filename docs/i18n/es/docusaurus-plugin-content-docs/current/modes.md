@@ -15,11 +15,17 @@ El modo decide qué herramientas existen. Una herramienta que el modo no permite
 | --- | --- |
 | `read` | Solo mirar: listar e inspeccionar contenedores, imágenes, volúmenes y redes, leer logs, ver qué consumen y qué ejecutan los contenedores, el estado de los proyectos de Compose y de los laboratorios, la información de Docker y su uso de disco |
 | `lab` | Solo laboratorios: arrancarlos, usarlos, comprobarlos, reiniciarlos y pararlos, con las reglas de abajo; solo ve los contenedores de los laboratorios |
-| `full` (por defecto) | Todo lo que hace Docker. Borrar cualquier cosa se marca como destructivo, así que el agente lo confirma antes, y un contenedor con opciones peligrosas necesita tu sí explícito |
+| `full` (por defecto) | Todo lo que hace Docker. Antes de borrar cualquier cosa, y antes de un contenedor con opciones peligrosas, docker-mcp te lo pregunta a ti |
 
 Subir una imagen a un registro usa el login que hiciste tú con `docker login`: el agente nunca te pide tu contraseña ni tu token, y si no hay login te dice qué ejecutar en tu propio terminal.
 
-Las opciones peligrosas son: un contenedor privilegiado, la red, los procesos o el IPC del equipo, capacidades extra, dispositivos, y montar el socket de Docker, la carpeta raíz del equipo o tu carpeta personal. Con cualquiera de ellas, `run_container` se niega hasta que el agente te lo pregunta y vuelve a llamar diciendo que has aceptado.
+Las opciones peligrosas son: un contenedor privilegiado, la red, los procesos o el IPC del equipo, capacidades extra, dispositivos, y montar el socket de Docker, la carpeta raíz del equipo o tu carpeta personal. Con cualquiera de ellas, `run_container` te pregunta antes.
+
+### Confirmas tú, no el agente
+
+Antes de lo que no se puede deshacer (borrar un contenedor, una imagen, un volumen o una red, limpiar con `prune`, parar un proyecto de Compose con sus volúmenes, parar o reiniciar un laboratorio) y antes de un contenedor con opciones peligrosas, docker-mcp te lo pregunta a ti a través de tu app: qué se pierde, o qué recibiría el contenedor, y un sí o un no. Tu respuesta va a docker-mcp, no al agente, así que el agente no puede contestar por ti. Si dices que no, no cambia nada.
+
+Para eso hace falta una app que pueda mostrarte la pregunta (elicitación de MCP): Claude Code y Codex pueden. En una que no pueda, estas herramientas se niegan. Si tu app ya te pregunta antes de cada llamada a una herramienta, arranca docker-mcp con `DOCKER_MCP_CONFIRM=client` y funcionan como antes.
 
 ### Probar algo aislado
 
@@ -55,5 +61,6 @@ Los laboratorios existen también en modo full, con las mismas reglas.
 | `DOCKER_MCP_MEMORY` | `memory` | Memoria por servicio de un laboratorio | `512m` |
 | `DOCKER_MCP_PIDS` | | Procesos por servicio de un laboratorio | `256` |
 | `DOCKER_MCP_ALLOWED_IMAGES` | `allowed_images` | Imágenes que puede usar un laboratorio, separadas por comas | cualquiera |
+| `DOCKER_MCP_CONFIRM` | | Quién confirma los borrados y las opciones peligrosas: `server` (docker-mcp te pregunta) o `client` (tu app pregunta antes de cada llamada) | `server` |
 
 Un valor que la aplicación deja como `${user_config…}` sin expandir (Codex no tiene ajustes de plugins) cuenta como no puesto.

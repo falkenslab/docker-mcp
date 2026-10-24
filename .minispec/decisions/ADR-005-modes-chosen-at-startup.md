@@ -6,7 +6,7 @@ The server has a complete set of Docker tools, each with its area (containers, i
 
 - `read`: only tools that read (list, inspect, logs, info, disk usage, labs' status).
 - `lab`: the labs (ADR-006), and reading the labs' containers and the images; nothing else can run.
-- `full`: everything. What deletes is annotated destructive; a container with dangerous options (privileged, the host's network, processes or IPC, extra capabilities, devices, the Docker socket, the host's root or the person's home mounted) is refused until the call says `confirmedDangerous: true`, which the description tells the agent to set only with the person's yes.
+- `full`: everything. What deletes is annotated destructive; a container with dangerous options (privileged, the host's network, processes or IPC, extra capabilities, devices, the Docker socket, the host's root or the person's home mounted) is refused until the call says `confirmedDangerous: true`, which the description tells the agent to set only with the person's yes. ADR-007 replaces that flag: the server asks the person itself, through elicitation, before dangerous options and before anything that can't be undone.
 
 ## Motivation
 

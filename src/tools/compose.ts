@@ -3,6 +3,7 @@ import { z } from "zod";
 import { docker, dockerOutput, forModel, jsonLines } from "../docker.js";
 import { reply } from "./reply.js";
 import { withDocker } from "./shared.js";
+import { confirm } from "../confirm.js";
 import { FULL, READ_AND_FULL, type ToolEntry } from "./types.js";
 
 const folder = z.string().min(1).describe("The Compose project's folder (absolute path), where its compose.yaml is");
@@ -103,18 +104,19 @@ export const COMPOSE_TOOLS: ToolEntry[] = [
   {
     area: "compose",
     modes: FULL,
-    register: (server) =>
+    register: (server, { config }) =>
       server.registerTool(
         "compose_down",
         {
           title: "Stop a Compose project",
-          description: "Stop and remove a Compose project's containers and networks; with volumes, its volumes and their data too. Confirm with the person first, saying whether the data goes.",
+          description: "Stop and remove a Compose project's containers and networks; with volumes, its volumes and their data too. Confirm with the person first; with volumes, the server asks the person to confirm it, naming what goes; if they say no, nothing is done.",
           inputSchema: { folder, file, volumes: z.boolean().default(false) },
           outputSchema: { stopped: z.string() },
           annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
         },
         async ({ folder: dir, file: f, volumes }) =>
           withDocker(async () => {
+            if (volumes) await confirm(server, config, { question: `Stop the Compose project in ${dir} and remove its volumes?`, details: ["Its containers and networks go, and its volumes with all their data; that can't be undone."], action: `removing the Compose project in ${dir} with its volumes` });
             await docker([...base(dir, f), "down", "--remove-orphans", ...(volumes ? ["--volumes"] : [])], { cwd: dir, timeoutMs: 300_000 });
             return reply({ stopped: dir });
           }),

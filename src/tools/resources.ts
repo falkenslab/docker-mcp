@@ -2,7 +2,8 @@
 import { z } from "zod";
 import { docker, jsonLines } from "../docker.js";
 import { reply } from "./reply.js";
-import { ref, withDocker } from "./shared.js";
+import { ASKS, ref, withDocker } from "./shared.js";
+import { confirm } from "../confirm.js";
 import { FULL, READ_AND_FULL, type ToolEntry } from "./types.js";
 
 type Kind = "volume" | "network";
@@ -76,19 +77,23 @@ function tools(kind: Kind): ToolEntry[] {
     {
       area,
       modes: FULL,
-      register: (server) =>
+      register: (server, { config }) =>
         server.registerTool(
           `remove_${kind}`,
           {
             title: `Remove a ${kind}`,
-            description: kind === "volume" ? "Remove a volume and every file in it. Can't be undone: confirm with the person first, naming it." : "Remove a network (no container may be attached). Confirm with the person first.",
+            description: kind === "volume" ? `Remove a volume and every file in it; can't be undone. ${ASKS}` : `Remove a network (no container may be attached). ${ASKS}`,
             inputSchema: { [kind]: name },
             outputSchema: { removed: z.string() },
             annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
           },
           async (input) =>
             withDocker(async () => {
-              await docker([kind, "rm", String(input[kind])]);
+              const id = String(input[kind]);
+              await confirm(server, config, kind === "volume"
+                ? { question: `Remove the volume ${id}?`, details: ["Every file in it goes, and it can't be undone."], action: `removing the volume ${id}` }
+                : { question: `Remove the network ${id}?`, details: ["Containers can't join it any more until it's created again."], action: `removing the network ${id}` });
+              await docker([kind, "rm", id]);
               return reply({ removed: String(input[kind]) });
             }),
         ),

@@ -15,11 +15,17 @@ The mode decides which tools exist. A tool outside the mode isn't offered to the
 | --- | --- |
 | `read` | Only look: list and inspect containers, images, volumes and networks, read logs, see what containers consume and run, Compose projects and labs' status, Docker's information and disk usage |
 | `lab` | Only labs: start, use, check, reset and stop them, under the policy below; it sees only the labs' containers |
-| `full` (default) | Everything Docker does. Removing anything is marked destructive, so the agent confirms it first, and a container with dangerous options needs your explicit yes |
+| `full` (default) | Everything Docker does. Before removing anything, and before a container with dangerous options, docker-mcp asks you itself |
 
 Pushing an image to a registry uses the login you made yourself with `docker login`: the agent never asks for your password or token, and when there is no login it tells you what to run in your own terminal.
 
-The dangerous options are: a privileged container, the host's network, processes or IPC, extra capabilities, devices, and mounting the Docker socket, the host's root folder or your home folder. With any of them, `run_container` refuses until the agent has asked you and calls again saying you agreed.
+The dangerous options are: a privileged container, the host's network, processes or IPC, extra capabilities, devices, and mounting the Docker socket, the host's root folder or your home folder. With any of them, `run_container` asks you first.
+
+### You confirm, not the agent
+
+Before what can't be undone (removing a container, an image, a volume or a network, cleaning up with `prune`, stopping a Compose project with its volumes, stopping or resetting a lab) and before a container with dangerous options, docker-mcp asks you itself, through your app: what goes, or what the container would get, and a yes or no. Your answer goes to docker-mcp, not to the agent, so the agent can't answer for you. If you say no, nothing changes.
+
+That needs an app that can show you the question (MCP elicitation): Claude Code and Codex can. In an app that can't, these tools refuse. If your app already asks you before every call to a tool, start docker-mcp with `DOCKER_MCP_CONFIRM=client` and they run as they did.
 
 ### Trying something isolated
 
@@ -55,5 +61,6 @@ Labs exist in full mode too, under the same policy.
 | `DOCKER_MCP_MEMORY` | `memory` | Memory per lab service | `512m` |
 | `DOCKER_MCP_PIDS` | | Processes per lab service | `256` |
 | `DOCKER_MCP_ALLOWED_IMAGES` | `allowed_images` | Images a lab may use, comma-separated | any |
+| `DOCKER_MCP_CONFIRM` | | Who confirms removals and dangerous options: `server` (docker-mcp asks you) or `client` (your app asks before every call) | `server` |
 
 A value the app leaves as an unexpanded `${user_config…}` (Codex has no plugin settings) counts as not set.

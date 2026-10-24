@@ -22,7 +22,7 @@ docker-mcp is an MCP server that lets an AI agent (Claude Code, Codex, an agent 
 ## ✨ Why docker-mcp
 
 - 🎚️ **Modes, not trust.** A tool outside the mode doesn't exist for the agent: in `read` it can't change anything, in `lab` it can't run anything but labs.
-- 🛡️ **Asks before the dangerous.** Removing anything is marked destructive, and a privileged container, the host's network or the Docker socket needs your explicit yes.
+- 🛡️ **You confirm, not the agent.** Before removing anything, and before a privileged container, the host's network or the Docker socket, docker-mcp asks you itself through your app, and your answer never passes through the model.
 - 🧪 **Labs for practices.** A folder with a `compose.yaml` and a check: no internet, no host mounts, limits on CPU and memory, refused if it breaks the rules, reset in one call.
 - 🧰 **The whole of Docker.** 47 tools over containers, images, volumes, networks, Compose and the system, each with structured results.
 - 🔧 **Explains, never installs.** Without Docker, or with it stopped, it says how to install or start it.

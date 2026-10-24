@@ -22,7 +22,12 @@ export interface Config {
   pids: number;
   /** Lab mode: the images a lab may use; empty is any. */
   allowedImages: string[];
+  /** Who confirms dangerous options and removals (ADR-007): the person, asked by this server, or the client. */
+  confirm: Confirm;
 }
+
+export const CONFIRMS = ["server", "client"] as const;
+export type Confirm = (typeof CONFIRMS)[number];
 
 export class ConfigError extends Error {}
 
@@ -36,6 +41,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const unknown = areas.filter((area) => !(AREAS as readonly string[]).includes(area));
   if (unknown.length) throw new ConfigError(`DOCKER_MCP_SCOPES has ${unknown.join(", ")}: it takes ${AREAS.join(", ")}.`);
   const pids = Number.parseInt(setting("DOCKER_MCP_PIDS", env) ?? "256", 10);
+  const confirm = (setting("DOCKER_MCP_CONFIRM", env) ?? "server").toLowerCase();
+  if (!(CONFIRMS as readonly string[]).includes(confirm)) throw new ConfigError(`DOCKER_MCP_CONFIRM is "${confirm}": it takes ${CONFIRMS.join(", ")}.`);
   return {
     mode: mode as Mode,
     areas: areas.length ? (areas as Area[]) : [...AREAS],
@@ -45,5 +52,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     memory: setting("DOCKER_MCP_MEMORY", env) ?? "512m",
     pids: Number.isFinite(pids) && pids > 0 ? pids : 256,
     allowedImages: list(setting("DOCKER_MCP_ALLOWED_IMAGES", env)),
+    confirm: confirm as Confirm,
   };
 }

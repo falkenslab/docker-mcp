@@ -21,6 +21,7 @@ Every setting is optional; without any, docker-mcp runs in full mode with all ar
 | `DOCKER_MCP_MEMORY` | Memory per lab service, e.g. `512m` or `1g` | `512m` |
 | `DOCKER_MCP_PIDS` | Processes per lab service | `256` |
 | `DOCKER_MCP_ALLOWED_IMAGES` | Images a lab may use, comma-separated | any |
+| `DOCKER_MCP_CONFIRM` | `server` (docker-mcp asks you before removals and dangerous options) or `client` (your app asks before every call) | `server` |
 
 To run a fixed version instead of the latest, name it in the command: `npx -y @falkenslab/docker-mcp@0.1.0`.
 
@@ -71,7 +72,8 @@ When the same name is in several scopes, `local` wins over `project`, and `proje
         "DOCKER_MCP_CPUS": "1",
         "DOCKER_MCP_MEMORY": "512m",
         "DOCKER_MCP_PIDS": "256",
-        "DOCKER_MCP_ALLOWED_IMAGES": "nginx:alpine,postgres:17"
+        "DOCKER_MCP_ALLOWED_IMAGES": "nginx:alpine,postgres:17",
+        "DOCKER_MCP_CONFIRM": "server"
       }
     }
   }
@@ -127,6 +129,7 @@ DOCKER_MCP_CPUS = "1"
 DOCKER_MCP_MEMORY = "512m"
 DOCKER_MCP_PIDS = "256"
 DOCKER_MCP_ALLOWED_IMAGES = "nginx:alpine,postgres:17"
+DOCKER_MCP_CONFIRM = "server"
 ```
 
 Keep only what you change. Codex's own keys for the entry:

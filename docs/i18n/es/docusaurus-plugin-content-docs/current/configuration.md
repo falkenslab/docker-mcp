@@ -21,6 +21,7 @@ Todos son opcionales; sin ninguno, docker-mcp funciona en modo full con todas la
 | `DOCKER_MCP_MEMORY` | Memoria por servicio de un laboratorio, p. ej. `512m` o `1g` | `512m` |
 | `DOCKER_MCP_PIDS` | Procesos por servicio de un laboratorio | `256` |
 | `DOCKER_MCP_ALLOWED_IMAGES` | Imágenes que puede usar un laboratorio, separadas por comas | cualquiera |
+| `DOCKER_MCP_CONFIRM` | `server` (docker-mcp te pregunta antes de borrar y de las opciones peligrosas) o `client` (tu app pregunta antes de cada llamada) | `server` |
 
 Para usar una versión fija en lugar de la última, nómbrala en el comando: `npx -y @falkenslab/docker-mcp@0.1.0`.
 
@@ -71,7 +72,8 @@ Si el mismo nombre está en varios ámbitos, `local` gana a `project` y `project
         "DOCKER_MCP_CPUS": "1",
         "DOCKER_MCP_MEMORY": "512m",
         "DOCKER_MCP_PIDS": "256",
-        "DOCKER_MCP_ALLOWED_IMAGES": "nginx:alpine,postgres:17"
+        "DOCKER_MCP_ALLOWED_IMAGES": "nginx:alpine,postgres:17",
+        "DOCKER_MCP_CONFIRM": "server"
       }
     }
   }
@@ -127,6 +129,7 @@ DOCKER_MCP_CPUS = "1"
 DOCKER_MCP_MEMORY = "512m"
 DOCKER_MCP_PIDS = "256"
 DOCKER_MCP_ALLOWED_IMAGES = "nginx:alpine,postgres:17"
+DOCKER_MCP_CONFIRM = "server"
 ```
 
 Deja solo lo que cambies. Las claves propias de Codex para la entrada:

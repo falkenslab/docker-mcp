@@ -2,7 +2,8 @@
 import { z } from "zod";
 import { labCheck, labDown, labExec, labLogs, labReset, labStatus, labUp, listLabs } from "../labs.js";
 import { reply } from "./reply.js";
-import { withDocker } from "./shared.js";
+import { ASKS, withDocker } from "./shared.js";
+import { confirm } from "../confirm.js";
 import { ALL_MODES, LAB_AND_FULL, type ToolEntry } from "./types.js";
 
 const lab = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_-]*$/).describe("The lab's name, as list_labs gives it");
@@ -115,12 +116,16 @@ export const LAB_TOOLS: ToolEntry[] = [
         "lab_reset",
         {
           title: "Reset a lab",
-          description: "Back to a clean start: the lab's containers, networks and volumes are removed (what was done inside them is lost; the files in its folder stay) and it starts again. Confirm with the person first.",
+          description: "Back to a clean start: the lab's containers, networks and volumes are removed (what was done inside them is lost; the files in its folder stay) and it starts again. " + ASKS,
           inputSchema: { lab },
           outputSchema: { lab: z.string(), services },
           annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
         },
-        async ({ lab: name }) => withDocker(async () => reply({ lab: name, services: await labReset(config, name) })),
+        async ({ lab: name }) =>
+          withDocker(async () => {
+            await confirm(server, config, { question: `Reset the lab ${name}?`, details: ["Its containers, networks and volumes are removed, so what was done inside them is lost; the files in its folder stay.", "Then it starts again from scratch."], action: `resetting the lab ${name}` });
+            return reply({ lab: name, services: await labReset(config, name) });
+          }),
       ),
   },
   {
@@ -131,13 +136,14 @@ export const LAB_TOOLS: ToolEntry[] = [
         "lab_down",
         {
           title: "Stop a lab",
-          description: "Stop a lab and remove its containers, networks and volumes (what was done inside them is lost; the files in its folder stay). Confirm with the person first.",
+          description: "Stop a lab and remove its containers, networks and volumes (what was done inside them is lost; the files in its folder stay). " + ASKS,
           inputSchema: { lab },
           outputSchema: { stopped: z.string() },
           annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
         },
         async ({ lab: name }) =>
           withDocker(async () => {
+            await confirm(server, config, { question: `Stop the lab ${name}?`, details: ["Its containers, networks and volumes are removed, so what was done inside them is lost; the files in its folder stay."], action: `stopping the lab ${name}` });
             await labDown(config, name);
             return reply({ stopped: name });
           }),

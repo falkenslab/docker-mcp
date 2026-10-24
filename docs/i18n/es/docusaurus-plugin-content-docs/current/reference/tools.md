@@ -63,7 +63,7 @@ Este servidor tiene **47 herramientas**. Esta página se genera a partir del pro
 
 **Server info**
 
-Show this server's name, version, mode (read, lab or full) and areas, its labs and data folders, and whether Docker is there. Contains no secrets.
+Show this server's name, version, mode (read, lab or full) and areas, who confirms removals and dangerous options, its labs and data folders, and whether Docker is there. Contains no secrets.
 
 *Sin entradas.*
 
@@ -95,7 +95,7 @@ How much disk Docker uses for images, containers, volumes and the build cache, a
 
 **Clean up Docker**
 
-Remove what isn't in use: stopped containers, dangling images (all unused ones with allImages), unused networks, unused volumes (only when volumes is true: their data is gone) and the build cache. Says how much space it freed. Can't be undone: confirm with the person first, naming what goes.
+Remove what isn't in use: stopped containers, dangling images (all unused ones with allImages), unused networks, unused volumes (only when volumes is true: their data is gone) and the build cache. Says how much space it freed. Can't be undone. The server asks the person to confirm it, naming what goes; if they say no, nothing is done.
 
 | Entrada | Obligatoria | Tipo | Descripción |
 | --- | :-: | --- | --- |
@@ -160,7 +160,7 @@ The processes running inside a container (docker top): their user, PID, start ti
 
 **Run a container**
 
-Create and start a container from an image (pulled if missing), in the background unless detach is false. Dangerous options (privileged, the host's network, processes or IPC, extra capabilities, devices, mounting the Docker socket, the host's root or the person's home) are refused unless confirmedDangerous is true: ask the person first, naming what they give the container. Changes the machine: confirm with the person first. To try something without it reaching the computer, isolate it: network "none", cpus, memory and pids limits, readOnly, noNewPrivileges, no ports or host folders, and a label to find and remove it later (list_containers filters by label). A foreground run (detach false) is stopped and removed when timeoutSeconds runs out.
+Create and start a container from an image (pulled if missing), in the background unless detach is false. Changes the machine: confirm with the person first. With dangerous options (privileged, the host's network, processes or IPC, extra capabilities, devices, mounting the Docker socket, the host's root or the person's home), the server also asks the person itself, saying what each gives the container; if they say no, it isn't run. To try something without it reaching the computer, isolate it: network "none", cpus, memory and pids limits, readOnly, noNewPrivileges, no ports or host folders, and a label to find and remove it later (list_containers filters by label). A foreground run (detach false) is stopped and removed when timeoutSeconds runs out.
 
 | Entrada | Obligatoria | Tipo | Descripción |
 | --- | :-: | --- | --- |
@@ -187,7 +187,6 @@ Create and start a container from an image (pulled if missing), in the backgroun
 | `noNewPrivileges` |  | boolean | Its processes can't gain privileges (setuid, sudo) |
 | `labels` |  | object | Labels to mark it, e.g. &#123; "docker-mcp.sandbox": "try-redis" &#125; |
 | `timeoutSeconds` |  | integer | A foreground run (detach false): stop and remove it after this long; 600 by default |
-| `confirmedDangerous` |  | boolean | The person confirmed the dangerous options, knowing what they give the container |
 
 ## `start_container` {#start-container}
 
@@ -223,7 +222,7 @@ Restart an existing container. Confirm with the person first.
 
 **Remove a container**
 
-Remove a container, with force to stop it first if it's running, and with volumes to remove its anonymous volumes. Its data is gone: confirm with the person first, naming it.
+Remove a container, with force to stop it first if it's running, and with volumes to remove its anonymous volumes. Its data is gone. The server asks the person to confirm it, naming what goes; if they say no, nothing is done.
 
 | Entrada | Obligatoria | Tipo | Descripción |
 | --- | :-: | --- | --- |
@@ -339,7 +338,7 @@ Upload a local image to its registry: Docker Hub unless its name starts with ano
 
 **Remove an image**
 
-Remove a local image (with force, even if a stopped container uses it). It has to be pulled or built again to be used: confirm with the person first, naming it.
+Remove a local image (with force, even if a stopped container uses it). It has to be pulled or built again to be used. The server asks the person to confirm it, naming what goes; if they say no, nothing is done.
 
 | Entrada | Obligatoria | Tipo | Descripción |
 | --- | :-: | --- | --- |
@@ -378,7 +377,7 @@ Create a named volume, for data that outlives a container. Confirm with the pers
 
 **Remove a volume**
 
-Remove a volume and every file in it. Can't be undone: confirm with the person first, naming it.
+Remove a volume and every file in it; can't be undone. The server asks the person to confirm it, naming what goes; if they say no, nothing is done.
 
 | Entrada | Obligatoria | Tipo | Descripción |
 | --- | :-: | --- | --- |
@@ -417,7 +416,7 @@ Create a network, internal if it shouldn't reach the outside. Confirm with the p
 
 **Remove a network**
 
-Remove a network (no container may be attached). Confirm with the person first.
+Remove a network (no container may be attached). The server asks the person to confirm it, naming what goes; if they say no, nothing is done.
 
 | Entrada | Obligatoria | Tipo | Descripción |
 | --- | :-: | --- | --- |
@@ -478,7 +477,7 @@ Start a Compose project's services in the background (building what has a build)
 
 **Stop a Compose project**
 
-Stop and remove a Compose project's containers and networks; with volumes, its volumes and their data too. Confirm with the person first, saying whether the data goes.
+Stop and remove a Compose project's containers and networks; with volumes, its volumes and their data too. Confirm with the person first; with volumes, the server asks the person to confirm it, naming what goes; if they say no, nothing is done.
 
 | Entrada | Obligatoria | Tipo | Descripción |
 | --- | :-: | --- | --- |
@@ -567,7 +566,7 @@ Run the lab's check (its lab.json) in its running service: passed when it exits 
 
 **Reset a lab**
 
-Back to a clean start: the lab's containers, networks and volumes are removed (what was done inside them is lost; the files in its folder stay) and it starts again. Confirm with the person first.
+Back to a clean start: the lab's containers, networks and volumes are removed (what was done inside them is lost; the files in its folder stay) and it starts again. The server asks the person to confirm it, naming what goes; if they say no, nothing is done.
 
 | Entrada | Obligatoria | Tipo | Descripción |
 | --- | :-: | --- | --- |
@@ -577,7 +576,7 @@ Back to a clean start: the lab's containers, networks and volumes are removed (w
 
 **Stop a lab**
 
-Stop a lab and remove its containers, networks and volumes (what was done inside them is lost; the files in its folder stay). Confirm with the person first.
+Stop a lab and remove its containers, networks and volumes (what was done inside them is lost; the files in its folder stay). The server asks the person to confirm it, naming what goes; if they say no, nothing is done.
 
 | Entrada | Obligatoria | Tipo | Descripción |
 | --- | :-: | --- | --- |

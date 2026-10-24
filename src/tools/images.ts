@@ -2,7 +2,8 @@ import { z } from "zod";
 import { docker, dockerOutput, explain, forModel, jsonLines } from "../docker.js";
 import { loginCommand, needsLogin, registryOf } from "../registry.js";
 import { reply } from "./reply.js";
-import { ref, withDocker } from "./shared.js";
+import { ASKS, ref, withDocker } from "./shared.js";
+import { confirm } from "../confirm.js";
 import { ALL_MODES, FULL, type ToolEntry } from "./types.js";
 
 const image = ref("image");
@@ -171,18 +172,19 @@ export const IMAGE_TOOLS: ToolEntry[] = [
   {
     area: "images",
     modes: FULL,
-    register: (server) =>
+    register: (server, { config }) =>
       server.registerTool(
         "remove_image",
         {
           title: "Remove an image",
-          description: "Remove a local image (with force, even if a stopped container uses it). It has to be pulled or built again to be used: confirm with the person first, naming it.",
+          description: "Remove a local image (with force, even if a stopped container uses it). It has to be pulled or built again to be used. " + ASKS,
           inputSchema: { image, force: z.boolean().default(false) },
           outputSchema: { removed: z.string() },
           annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
         },
         async ({ image: id, force }) =>
           withDocker(async () => {
+            await confirm(server, config, { question: `Remove the image ${id}?`, details: ["To use it again it has to be pulled or built again.", ...(force ? ["Even if a stopped container uses it."] : [])], action: `removing the image ${id}` });
             await docker(["rmi", ...(force ? ["-f"] : []), id]);
             return reply({ removed: id });
           }),
