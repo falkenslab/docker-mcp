@@ -5,6 +5,14 @@ sidebar_label: Releases
 
 # Releases
 
+## 0.3.0
+
+November 10, 2026.
+
+- **Confirmations in your language.** The question docker-mcp asks you before a removal or a dangerous container is in your app's language when the app tells it through its locale (`LANG`, `LC_MESSAGES` or `LC_ALL`, as agent-kit does): English and Spanish so far. What the agent reads stays in English. See [Modes and settings](modes.md#you-confirm-not-the-agent).
+- **Fixed: a confirmation no longer expires after a minute.** It waits up to an hour for your answer; before, a slow answer came back as a refusal you hadn't given. If a question does go unanswered, the agent is told it expired, and nothing changes.
+- `server_info` reports the language the person is asked in.
+
 ## 0.2.0
 
 October 24, 2026.

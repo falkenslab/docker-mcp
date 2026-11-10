@@ -5,6 +5,14 @@ sidebar_label: Versiones
 
 # Versiones
 
+## 0.3.0
+
+10 de noviembre de 2026.
+
+- **Confirmaciones en tu idioma.** La pregunta que docker-mcp te hace antes de un borrado o de un contenedor peligroso sale en el idioma de tu app cuando la app se lo dice con su *locale* (`LANG`, `LC_MESSAGES` o `LC_ALL`, como hace agent-kit): de momento en inglés y en español. Lo que lee el agente sigue en inglés. Mira [Modos y ajustes](modes.md#confirmas-tú-no-el-agente).
+- **Arreglado: una confirmación ya no caduca al minuto.** Espera tu respuesta hasta una hora; antes, contestar despacio acababa en un rechazo que no habías dado. Si una pregunta se queda sin respuesta, al agente se le dice que caducó, y no cambia nada.
+- `server_info` dice en qué idioma se pregunta a la persona.
+
 ## 0.2.0
 
 24 de octubre de 2026.
