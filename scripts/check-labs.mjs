@@ -1,4 +1,4 @@
-// Checks, against the engine the Docker CLI points at (Docker, or Podman through its Docker-compatible socket),
+// Checks, against the engine the Docker CLI points at,
 // what labs rely on (ADR-006): the built server starts a throwaway lab in lab mode and this script looks at
 // what the engine really did: the limits from inside the container, no new privileges, no internet, and that
 // lab mode sees only the labs' containers. It cleans up after itself. Run after `npm run build`.
@@ -17,8 +17,7 @@ const docker = (...args) => execFileSync("docker", args, { encoding: "utf8", std
 const engine = (() => {
   try {
     const version = JSON.parse(docker("version", "--format", "{{json .Server}}"));
-    const podman = (version.Components ?? []).some((c) => /podman/i.test(c.Name ?? ""));
-    return `${podman ? "Podman" : "Docker"} ${version.Version ?? ""} (${version.Os ?? ""})`;
+    return `Docker ${version.Version ?? ""} (${version.Os ?? ""})`;
   } catch (error) {
     console.error(`The Docker CLI can't reach an engine: ${error.stderr ?? error.message}`);
     process.exit(1);
