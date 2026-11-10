@@ -123,7 +123,7 @@ export const LAB_TOOLS: ToolEntry[] = [
         },
         async ({ lab: name }) =>
           withDocker(async () => {
-            await confirm(server, config, { question: `Reset the lab ${name}?`, details: ["Its containers, networks and volumes are removed, so what was done inside them is lost; the files in its folder stay.", "Then it starts again from scratch."], action: `resetting the lab ${name}` });
+            await confirm(server, config, { ask: (m) => m.labReset(name), action: `resetting the lab ${name}` });
             return reply({ lab: name, services: await labReset(config, name) });
           }),
       ),
@@ -143,7 +143,7 @@ export const LAB_TOOLS: ToolEntry[] = [
         },
         async ({ lab: name }) =>
           withDocker(async () => {
-            await confirm(server, config, { question: `Stop the lab ${name}?`, details: ["Its containers, networks and volumes are removed, so what was done inside them is lost; the files in its folder stay."], action: `stopping the lab ${name}` });
+            await confirm(server, config, { ask: (m) => m.labDown(name), action: `stopping the lab ${name}` });
             await labDown(config, name);
             return reply({ stopped: name });
           }),

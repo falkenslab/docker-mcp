@@ -91,8 +91,8 @@ function tools(kind: Kind): ToolEntry[] {
             withDocker(async () => {
               const id = String(input[kind]);
               await confirm(server, config, kind === "volume"
-                ? { question: `Remove the volume ${id}?`, details: ["Every file in it goes, and it can't be undone."], action: `removing the volume ${id}` }
-                : { question: `Remove the network ${id}?`, details: ["Containers can't join it any more until it's created again."], action: `removing the network ${id}` });
+                ? { ask: (m) => m.removeVolume(id), action: `removing the volume ${id}` }
+                : { ask: (m) => m.removeNetwork(id), action: `removing the network ${id}` });
               await docker([kind, "rm", id]);
               return reply({ removed: String(input[kind]) });
             }),

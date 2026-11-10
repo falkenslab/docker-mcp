@@ -3,7 +3,7 @@ import { homedir } from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { parse } from "yaml";
-import { bindSource, dangers, isolationArgs, labOverride, labProblems } from "../src/policy.js";
+import { bindSource, dangers, describeDanger, isolationArgs, labOverride, labProblems } from "../src/policy.js";
 
 const lab = path.resolve("/labs/web");
 const limits = { allowInternet: false, cpus: "1", memory: "512m", pids: 256 };
@@ -20,7 +20,8 @@ describe("policy", () => {
     assert.deepEqual(dangers({ volumes: ["data:/data"], network: "bridge" }), []);
     const found = dangers({ privileged: true, network: "host", volumes: ["/var/run/docker.sock:/var/run/docker.sock", "/:/host", `${homedir()}:/me`], capAdd: ["SYS_ADMIN"] });
     assert.equal(found.length, 6);
-    assert.match(found.join(" "), /privileged.*network.*capabilities.*Docker socket.*root.*home/s);
+    assert.deepEqual(found.map((d) => d.kind), ["privileged", "host-network", "capabilities", "docker-socket", "host-root", "home"]);
+    assert.match(found.map(describeDanger).join(" "), /privileged.*network.*capabilities \(SYS_ADMIN\).*Docker socket.*root folder \(\/\).*home/s);
   });
 
   it("accepts a lab within the policy", () => {

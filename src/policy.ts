@@ -31,23 +31,45 @@ export function bindSource(volume: string): string | undefined {
   return /^[./~\\]|^[A-Za-z]:/.test(source) || source.includes("/") ? source : undefined;
 }
 
-/** The dangerous options a run asks for, in words; empty when none. */
-export function dangers(options: ContainerOptions): string[] {
-  const found: string[] = [];
-  if (options.privileged) found.push("a privileged container (full access to the host)");
-  if (options.network === "host") found.push("the host's network");
-  if (options.pid === "host") found.push("the host's processes");
-  if (options.ipc === "host") found.push("the host's IPC");
-  if (options.capAdd?.length) found.push(`extra capabilities (${options.capAdd.join(", ")})`);
-  if (options.devices?.length) found.push(`host devices (${options.devices.join(", ")})`);
+/** One dangerous option a run asks for, with what it names (capabilities, devices, a folder). */
+export interface Danger {
+  kind: "privileged" | "host-network" | "host-pid" | "host-ipc" | "capabilities" | "devices" | "docker-socket" | "host-root" | "home";
+  value?: string;
+}
+
+/** The dangerous options a run asks for; empty when none. The person reads them in their language (messages.ts). */
+export function dangers(options: ContainerOptions): Danger[] {
+  const found: Danger[] = [];
+  if (options.privileged) found.push({ kind: "privileged" });
+  if (options.network === "host") found.push({ kind: "host-network" });
+  if (options.pid === "host") found.push({ kind: "host-pid" });
+  if (options.ipc === "host") found.push({ kind: "host-ipc" });
+  if (options.capAdd?.length) found.push({ kind: "capabilities", value: options.capAdd.join(", ") });
+  if (options.devices?.length) found.push({ kind: "devices", value: options.devices.join(", ") });
   for (const volume of options.volumes ?? []) {
     const source = bindSource(volume);
     if (!source) continue;
-    if (DOCKER_SOCKET.test(source)) found.push("the Docker socket (control of every container on the host)");
-    else if (isRoot(source)) found.push(`the host's root folder (${source})`);
-    else if (isHome(source)) found.push(`the person's home folder (${source})`);
+    if (DOCKER_SOCKET.test(source)) found.push({ kind: "docker-socket" });
+    else if (isRoot(source)) found.push({ kind: "host-root", value: source });
+    else if (isHome(source)) found.push({ kind: "home", value: source });
   }
   return found;
+}
+
+/** A dangerous option in English words, for the model (what the refusals say). */
+export function describeDanger({ kind, value }: Danger): string {
+  const words: Record<Danger["kind"], string> = {
+    privileged: "a privileged container (full access to the host)",
+    "host-network": "the host's network",
+    "host-pid": "the host's processes",
+    "host-ipc": "the host's IPC",
+    capabilities: `extra capabilities (${value})`,
+    devices: `host devices (${value})`,
+    "docker-socket": "the Docker socket (control of every container on the host)",
+    "host-root": `the host's root folder (${value})`,
+    home: `the person's home folder (${value})`,
+  };
+  return words[kind];
 }
 
 /** What limits and cuts off one container (#6): the run's options for a try that can't reach the computer. */

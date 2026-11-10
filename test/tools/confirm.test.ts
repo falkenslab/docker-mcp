@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
+import { CONFIRM_TIMEOUT_MS, confirmWait } from "../../src/confirm.js";
 import { connect, fakeDocker, testConfig } from "../helpers.js";
 
 let docker: ReturnType<typeof fakeDocker>;
@@ -73,6 +74,52 @@ describe("removals ask the person (ADR-007)", () => {
     assert.equal(result.isError, true);
     assert.match(text(result), /stopping the lab web was refused/);
     assert.equal(docker.calls.length, 0);
+  });
+
+  it("asks in Spanish when the app starts it in a Spanish locale", async () => {
+    docker = fakeDocker();
+    const asked: { message: string; title?: string }[] = [];
+    const client = await connect(testConfig({ LANG: "es_ES.UTF-8" }), (params) => {
+      const schema = (params as { requestedSchema?: { properties: { confirm: { title?: string } } } }).requestedSchema;
+      asked.push({ message: params.message, title: schema?.properties.confirm.title });
+      return yes();
+    });
+    await client.callTool({ name: "lab_down", arguments: { lab: "web" } });
+    assert.match(asked[0]?.message ?? "", /^¿Parar el laboratorio web\?\n- Se borran sus contenedores/);
+    assert.equal(asked[0]?.title, "Sí, adelante");
+    const info = await client.callTool({ name: "server_info", arguments: {} });
+    assert.equal((info.structuredContent as { language: string }).language, "es");
+  });
+
+  it("keeps what the model reads in English, whatever the person's language", async () => {
+    docker = fakeDocker();
+    const result = await (await connect(testConfig({ LANG: "es_ES.UTF-8" }), () => ({ action: "decline" }))).callTool({ name: "remove_volume", arguments: { volume: "db-data" } });
+    assert.match(text(result), /The person said no, so removing the volume db-data wasn't done/);
+  });
+
+  it("waits for the person longer than the MCP SDK's own 60 seconds, well below Node's timer limit", () => {
+    assert.ok(CONFIRM_TIMEOUT_MS > 60_000 && CONFIRM_TIMEOUT_MS < 2 ** 31 - 1);
+  });
+
+  it("waits for a slow answer within its time, and says when a question expired", async () => {
+    const previous = confirmWait.ms;
+    confirmWait.ms = 400;
+    try {
+      docker = fakeDocker();
+      const late = (ms: number) => () => new Promise<ReturnType<typeof yes>>((resolve) => setTimeout(() => resolve(yes()), ms));
+      const inTime = await (await connect(testConfig(), late(150))).callTool({ name: "remove_volume", arguments: { volume: "db-data" } });
+      assert.notEqual(inTime.isError, true);
+      assert.deepEqual(docker.calls[0]?.args, ["volume", "rm", "db-data"]);
+      docker.restore();
+      docker = fakeDocker();
+      const expired = await (await connect(testConfig(), late(1500))).callTool({ name: "remove_volume", arguments: { volume: "db-data" } });
+      assert.equal(expired.isError, true);
+      assert.match(text(expired), /question to the person expired after 0 seconds without an answer, so removing the volume db-data wasn't done/);
+      assert.doesNotMatch(text(expired), /couldn't be asked/);
+      assert.equal(docker.calls.length, 0);
+    } finally {
+      confirmWait.ms = previous;
+    }
   });
 
   it("refuses an unknown DOCKER_MCP_CONFIRM at startup", () => {

@@ -2,6 +2,7 @@
 // tools exist (ADR-005), and lab mode's limits.
 import path from "node:path";
 import { dataDir } from "./dataDir.js";
+import { type Language, languageFrom } from "./messages.js";
 import { setting } from "./settings.js";
 
 export const MODES = ["read", "lab", "full"] as const;
@@ -24,6 +25,8 @@ export interface Config {
   allowedImages: string[];
   /** Who confirms dangerous options and removals (ADR-007): the person, asked by this server, or the client. */
   confirm: Confirm;
+  /** The language the person is asked in, from the locale the app starts it with (messages.ts). */
+  language: Language;
 }
 
 export const CONFIRMS = ["server", "client"] as const;
@@ -53,5 +56,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     pids: Number.isFinite(pids) && pids > 0 ? pids : 256,
     allowedImages: list(setting("DOCKER_MCP_ALLOWED_IMAGES", env)),
     confirm: confirm as Confirm,
+    language: languageFrom(env),
   };
 }

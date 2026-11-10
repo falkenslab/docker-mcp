@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { docker, dockerOutput, forModel, jsonLines } from "../docker.js";
 import { randomUUID } from "node:crypto";
-import { dangers, isolationArgs } from "../policy.js";
+import { dangers, describeDanger, isolationArgs } from "../policy.js";
 import { parseStats, parseTop } from "../usage.js";
 import { reply } from "./reply.js";
 import { ASKS, LABEL, ownedInLab, ref, withDocker } from "./shared.js";
@@ -201,7 +201,7 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
           withDocker(async () => {
             const found = dangers(input);
             if (found.length)
-              await confirm(server, config, { question: `Run a container from ${input.image} with these dangerous options?`, details: found, action: `running ${input.image} with ${found.join(", ")}` });
+              await confirm(server, config, { ask: (m) => m.runDangerous(input.image, found), action: `running ${input.image} with ${found.map(describeDanger).join(", ")}` });
             // A foreground run gets a name, so it can be stopped and removed when it runs out of time.
             const name = input.name ?? (input.detach ? undefined : `docker-mcp-run-${randomUUID().slice(0, 8)}`);
             const args = ["run", ...(input.detach ? ["-d"] : []), ...(input.remove ? ["--rm"] : []), ...(name ? ["--name", name] : [])];
@@ -265,8 +265,7 @@ export const CONTAINER_TOOLS: ToolEntry[] = [
         async ({ container: id, force, volumes }) =>
           withDocker(async () => {
             await confirm(server, config, {
-              question: `Remove the container ${id}?`,
-              details: ["Whatever it wrote inside is gone.", ...(force ? ["If it's running, it's stopped first."] : []), ...(volumes ? ["Its anonymous volumes and their data go too."] : [])],
+              ask: (m) => m.removeContainer(id, force, volumes),
               action: `removing the container ${id}`,
             });
             await docker(["rm", ...(force ? ["-f"] : []), ...(volumes ? ["-v"] : []), id]);

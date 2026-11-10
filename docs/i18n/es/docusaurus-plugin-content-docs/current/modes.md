@@ -23,7 +23,9 @@ Las opciones peligrosas son: un contenedor privilegiado, la red, los procesos o 
 
 ### Confirmas tú, no el agente
 
-Antes de lo que no se puede deshacer (borrar un contenedor, una imagen, un volumen o una red, limpiar con `prune`, parar un proyecto de Compose con sus volúmenes, parar o reiniciar un laboratorio) y antes de un contenedor con opciones peligrosas, docker-mcp te lo pregunta a ti a través de tu app: qué se pierde, o qué recibiría el contenedor, y un sí o un no. Tu respuesta va a docker-mcp, no al agente, así que el agente no puede contestar por ti. Si dices que no, no cambia nada.
+Antes de lo que no se puede deshacer (borrar un contenedor, una imagen, un volumen o una red, limpiar con `prune`, parar un proyecto de Compose con sus volúmenes, parar o reiniciar un laboratorio) y antes de un contenedor con opciones peligrosas, docker-mcp te lo pregunta a ti a través de tu app: qué se pierde, o qué recibiría el contenedor, y un sí o un no. Tu respuesta va a docker-mcp, no al agente, así que el agente no puede contestar por ti. Si dices que no, no cambia nada. La pregunta espera tu respuesta hasta una hora; si se queda sin contestar, tampoco cambia nada.
+
+La pregunta sale en el idioma de tu app cuando la app se lo dice a docker-mcp con su *locale* (`LANG`, `LC_MESSAGES` o `LC_ALL`, como hace agent-kit): de momento en inglés y en español, y en inglés si no. Lo que lee el agente sigue en inglés.
 
 Para eso hace falta una app que pueda mostrarte la pregunta (elicitación de MCP): Claude Code y Codex pueden. En una que no pueda, estas herramientas se niegan. Si tu app ya te pregunta antes de cada llamada a una herramienta, arranca docker-mcp con `DOCKER_MCP_CONFIRM=client` y funcionan como antes.
 

@@ -184,7 +184,7 @@ export const IMAGE_TOOLS: ToolEntry[] = [
         },
         async ({ image: id, force }) =>
           withDocker(async () => {
-            await confirm(server, config, { question: `Remove the image ${id}?`, details: ["To use it again it has to be pulled or built again.", ...(force ? ["Even if a stopped container uses it."] : [])], action: `removing the image ${id}` });
+            await confirm(server, config, { ask: (m) => m.removeImage(id, force), action: `removing the image ${id}` });
             await docker(["rmi", ...(force ? ["-f"] : []), id]);
             return reply({ removed: id });
           }),

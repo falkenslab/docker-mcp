@@ -65,10 +65,17 @@ const PRUNED: Record<string, string[]> = {
   everything: ["Containers", "Images", "Build Cache"],
 };
 
-/** What a prune would free, from `docker system df --format '{{json .}}'`: one line per kind, "Images: up to 1.2GB". */
-export function pruneEstimate(df: string, what: string, volumes: boolean): string[] {
+export interface Reclaimable {
+  /** Docker's kind: Containers, Images, Local Volumes, Build Cache. */
+  type: string;
+  /** Up to how much a prune would free, e.g. 1.2GB. */
+  amount: string;
+}
+
+/** What a prune would free, from `docker system df --format '{{json .}}'`: one entry per kind it touches. */
+export function pruneEstimate(df: string, what: string, volumes: boolean): Reclaimable[] {
   const types = [...(PRUNED[what] ?? []), ...(what === "everything" && volumes ? ["Local Volumes"] : [])];
   return jsonLines<Record<string, string>>(df)
     .filter((row) => types.includes(row.Type ?? ""))
-    .map((row) => `${row.Type}: up to ${(row.Reclaimable ?? "0B").replace(/\s*\(.*\)$/, "")} could be freed`);
+    .map((row) => ({ type: row.Type ?? "", amount: (row.Reclaimable ?? "0B").replace(/\s*\(.*\)$/, "") }));
 }

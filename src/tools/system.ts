@@ -88,7 +88,7 @@ export const SYSTEM_TOOLS: ToolEntry[] = [
           withDocker(async () => {
             const df = await docker(["system", "df", "--format", "{{json .}}"]).catch(() => "");
             const kinds = what === "everything" ? `stopped containers, unused networks, ${allImages ? "unused" : "dangling"} images and the build cache${volumes ? ", and unused volumes with their data" : ""}` : what === "volumes" ? "unused volumes and their data" : what === "images" && allImages ? "every unused image" : what === "images" ? "dangling images" : what === "containers" ? "stopped containers" : what === "networks" ? "unused networks" : "the build cache";
-            await confirm(server, config, { question: `Clean up Docker: remove ${kinds}?`, details: [...pruneEstimate(df, what, volumes), "It can't be undone."], action: `removing ${kinds}` });
+            await confirm(server, config, { ask: (m) => m.prune(what, allImages, volumes, pruneEstimate(df, what, volumes)), action: `removing ${kinds}` });
             const args =
               what === "everything"
                 ? ["system", "prune", "-f", ...(allImages ? ["-a"] : []), ...(volumes ? ["--volumes"] : [])]

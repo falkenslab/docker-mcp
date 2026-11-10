@@ -116,7 +116,7 @@ export const COMPOSE_TOOLS: ToolEntry[] = [
         },
         async ({ folder: dir, file: f, volumes }) =>
           withDocker(async () => {
-            if (volumes) await confirm(server, config, { question: `Stop the Compose project in ${dir} and remove its volumes?`, details: ["Its containers and networks go, and its volumes with all their data; that can't be undone."], action: `removing the Compose project in ${dir} with its volumes` });
+            if (volumes) await confirm(server, config, { ask: (m) => m.composeDownVolumes(dir), action: `removing the Compose project in ${dir} with its volumes` });
             await docker([...base(dir, f), "down", "--remove-orphans", ...(volumes ? ["--volumes"] : [])], { cwd: dir, timeoutMs: 300_000 });
             return reply({ stopped: dir });
           }),
