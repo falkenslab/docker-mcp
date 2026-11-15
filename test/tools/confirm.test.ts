@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { CONFIRM_TIMEOUT_MS, confirmWait } from "../../src/confirm.js";
 import { connect, fakeDocker, testConfig } from "../helpers.js";
 
@@ -68,12 +71,28 @@ describe("removals ask the person (ADR-007)", () => {
     assert.equal(asked, 1);
   });
 
-  it("asks before stopping or resetting a lab, in lab mode too", async () => {
+  it("asks before resetting a lab, in lab mode too", async () => {
     docker = fakeDocker();
-    const result = await (await connect(testConfig({ DOCKER_MCP_MODE: "lab" }))).callTool({ name: "lab_down", arguments: { lab: "web" } });
+    const result = await (await connect(testConfig({ DOCKER_MCP_MODE: "lab" }))).callTool({ name: "lab_reset", arguments: { lab: "web" } });
     assert.equal(result.isError, true);
-    assert.match(text(result), /stopping the lab web was refused/);
+    assert.match(text(result), /resetting the lab web was refused/);
     assert.equal(docker.calls.length, 0);
+  });
+
+  it("stops a lab without asking, so an unattended agent can clean up (#11)", async () => {
+    const root = mkdtempSync(path.join(tmpdir(), "docker-mcp-labs-"));
+    mkdirSync(path.join(root, "web"));
+    writeFileSync(path.join(root, "web", "compose.yaml"), "services:\n  web:\n    image: nginx\n");
+    for (const mode of ["lab", "full"]) {
+      docker = fakeDocker();
+      let asked = false;
+      const config = testConfig({ DOCKER_MCP_MODE: mode, DOCKER_MCP_LABS_DIR: root, CLAUDE_PLUGIN_DATA: path.join(root, ".data") });
+      const result = await (await connect(config, () => ((asked = true), { action: "decline" }))).callTool({ name: "lab_down", arguments: { lab: "web" } });
+      assert.notEqual(result.isError, true, mode);
+      assert.equal(asked, false, mode);
+      assert.deepEqual(docker.calls[0]?.args, ["compose", "-p", "docker-mcp-lab-web", "down", "--volumes", "--remove-orphans"], mode);
+      docker.restore();
+    }
   });
 
   it("asks in Spanish when the app starts it in a Spanish locale", async () => {
@@ -84,8 +103,8 @@ describe("removals ask the person (ADR-007)", () => {
       asked.push({ message: params.message, title: schema?.properties.confirm.title });
       return yes();
     });
-    await client.callTool({ name: "lab_down", arguments: { lab: "web" } });
-    assert.match(asked[0]?.message ?? "", /^¿Parar el laboratorio web\?\n- Se borran sus contenedores/);
+    await client.callTool({ name: "lab_reset", arguments: { lab: "web" } });
+    assert.match(asked[0]?.message ?? "", /^¿Reiniciar el laboratorio web\?\n- Se borran sus contenedores/);
     assert.equal(asked[0]?.title, "Sí, adelante");
     const info = await client.callTool({ name: "server_info", arguments: {} });
     assert.equal((info.structuredContent as { language: string }).language, "es");

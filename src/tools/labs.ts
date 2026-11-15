@@ -136,14 +136,13 @@ export const LAB_TOOLS: ToolEntry[] = [
         "lab_down",
         {
           title: "Stop a lab",
-          description: "Stop a lab and remove its containers, networks and volumes (what was done inside them is lost; the files in its folder stay). " + ASKS,
+          description: "Stop a lab and remove its containers, networks and volumes: what was done inside them is lost, the files in its folder stay, and lab_up brings it back. It doesn't ask the person, so an agent can clean up the labs it started; say what you're stopping.",
           inputSchema: { lab },
           outputSchema: { stopped: z.string() },
           annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
         },
         async ({ lab: name }) =>
           withDocker(async () => {
-            await confirm(server, config, { ask: (m) => m.labDown(name), action: `stopping the lab ${name}` });
             await labDown(config, name);
             return reply({ stopped: name });
           }),

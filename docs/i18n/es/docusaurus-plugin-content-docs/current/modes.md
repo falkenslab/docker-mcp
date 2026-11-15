@@ -23,7 +23,7 @@ Las opciones peligrosas son: un contenedor privilegiado, la red, los procesos o 
 
 ### Confirmas tú, no el agente
 
-Antes de lo que no se puede deshacer (borrar un contenedor, una imagen, un volumen o una red, limpiar con `prune`, parar un proyecto de Compose con sus volúmenes, parar o reiniciar un laboratorio) y antes de un contenedor con opciones peligrosas, docker-mcp te lo pregunta a ti a través de tu app: qué se pierde, o qué recibiría el contenedor, y un sí o un no. Tu respuesta va a docker-mcp, no al agente, así que el agente no puede contestar por ti. Si dices que no, no cambia nada. La pregunta espera tu respuesta hasta una hora; si se queda sin contestar, tampoco cambia nada.
+Antes de lo que no se puede deshacer (borrar un contenedor, una imagen, un volumen o una red, limpiar con `prune`, parar un proyecto de Compose con sus volúmenes, reiniciar un laboratorio) y antes de un contenedor con opciones peligrosas, docker-mcp te lo pregunta a ti a través de tu app: qué se pierde, o qué recibiría el contenedor, y un sí o un no. Tu respuesta va a docker-mcp, no al agente, así que el agente no puede contestar por ti. Si dices que no, no cambia nada. Parar un laboratorio no pregunta: sus archivos se quedan y vuelve a arrancar como estaba, así que un agente puede recoger los laboratorios que arrancó aunque no haya nadie para contestar. La pregunta espera tu respuesta hasta una hora; si se queda sin contestar, tampoco cambia nada.
 
 La pregunta sale en el idioma de tu app cuando la app se lo dice a docker-mcp con su *locale* (`LANG`, `LC_MESSAGES` o `LC_ALL`, como hace agent-kit): de momento en inglés y en español, y en inglés si no. Lo que lee el agente sigue en inglés.
 

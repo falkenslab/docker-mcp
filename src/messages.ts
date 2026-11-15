@@ -32,7 +32,6 @@ export interface Messages {
   removeNetwork(id: string): Ask;
   prune(what: PruneWhat, allImages: boolean, volumes: boolean, estimate: Reclaimable[]): Ask;
   composeDownVolumes(folder: string): Ask;
-  labDown(lab: string): Ask;
   labReset(lab: string): Ask;
   runDangerous(image: string, dangers: Danger[]): Ask;
 }
@@ -61,7 +60,6 @@ const en: Messages = {
     return { question: `Clean up Docker: remove ${kinds[what]}?`, details: [...estimate.map(({ type, amount }) => `${type}: up to ${amount} could be freed`), "It can't be undone."] };
   },
   composeDownVolumes: (folder) => ({ question: `Stop the Compose project in ${folder} and remove its volumes?`, details: ["Its containers and networks go, and its volumes with all their data; that can't be undone."] }),
-  labDown: (lab) => ({ question: `Stop the lab ${lab}?`, details: [LAB_LOSS_EN] }),
   labReset: (lab) => ({ question: `Reset the lab ${lab}?`, details: [LAB_LOSS_EN, "Then it starts again from scratch."] }),
   runDangerous: (image, dangers) => ({
     question: `Run a container from ${image} with these dangerous options?`,
@@ -104,7 +102,6 @@ const es: Messages = {
     return { question: `Limpiar Docker: ¿borrar ${kinds[what]}?`, details: [...estimate.map(({ type, amount }) => `${TYPES_ES[type] ?? type}: se liberarían hasta ${amount}`), "No se puede deshacer."] };
   },
   composeDownVolumes: (folder) => ({ question: `¿Parar el proyecto de Compose de ${folder} y borrar sus volúmenes?`, details: ["Se borran sus contenedores y redes, y sus volúmenes con todos sus datos; no se puede deshacer."] }),
-  labDown: (lab) => ({ question: `¿Parar el laboratorio ${lab}?`, details: [LAB_LOSS_ES] }),
   labReset: (lab) => ({ question: `¿Reiniciar el laboratorio ${lab}?`, details: [LAB_LOSS_ES, "Después vuelve a arrancar desde cero."] }),
   runDangerous: (image, dangers) => ({
     question: `¿Ejecutar un contenedor de ${image} con estas opciones peligrosas?`,

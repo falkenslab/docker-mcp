@@ -2,7 +2,7 @@
 
 ## Decision
 
-Before a container with dangerous options, and before anything that can't be undone (removing a container, an image, a volume or a network, `prune`, `compose_down` with volumes, `lab_down`, `lab_reset`), the server itself asks the person through MCP elicitation: what goes or what the container gets, in plain words, and a yes or no. The answer reaches the server, never the model. A client without elicitation gets a refusal, unless the server was started with `DOCKER_MCP_CONFIRM=client`, which trusts the client to ask before every call. `confirmedDangerous`, the input the model set, is gone.
+Before a container with dangerous options, and before anything that can't be undone (removing a container, an image, a volume or a network, `prune`, `compose_down` with volumes, `lab_reset`), the server itself asks the person through MCP elicitation: what goes or what the container gets, in plain words, and a yes or no. The answer reaches the server, never the model. A client without elicitation gets a refusal, unless the server was started with `DOCKER_MCP_CONFIRM=client`, which trusts the client to ask before every call. `confirmedDangerous`, the input the model set, is gone.
 
 ## Motivation
 
@@ -14,3 +14,4 @@ ADR-005 refused dangerous options until `confirmedDangerous: true`, and left rem
 - Every new tool that removes data, or a new dangerous option, asks through `confirm()` (`src/confirm.ts`), naming what goes.
 - Their descriptions say the server asks; the model doesn't need to ask again, but still says what it's about to do.
 - The docker-lab extension's skills stop telling the model to pass `confirmedDangerous`.
+- `lab_down` doesn't ask, like `lab_up` (owner's issue #11, 2026-11-15): it loses only the state built inside a lab, which the agent itself created, while the lab's files stay and `lab_up` brings it back. Asking left every lab running in unattended runs, where nobody can answer and the client declines. `lab_reset` still asks: it loses the work mid-task.

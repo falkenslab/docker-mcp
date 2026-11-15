@@ -576,7 +576,7 @@ Back to a clean start: the lab's containers, networks and volumes are removed (w
 
 **Stop a lab**
 
-Stop a lab and remove its containers, networks and volumes (what was done inside them is lost; the files in its folder stay). The server asks the person to confirm it, naming what goes; if they say no, nothing is done.
+Stop a lab and remove its containers, networks and volumes: what was done inside them is lost, the files in its folder stay, and lab_up brings it back. It doesn't ask the person, so an agent can clean up the labs it started; say what you're stopping.
 
 | Entrada | Obligatoria | Tipo | Descripción |
 | --- | :-: | --- | --- |

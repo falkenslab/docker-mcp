@@ -23,7 +23,7 @@ The dangerous options are: a privileged container, the host's network, processes
 
 ### You confirm, not the agent
 
-Before what can't be undone (removing a container, an image, a volume or a network, cleaning up with `prune`, stopping a Compose project with its volumes, stopping or resetting a lab) and before a container with dangerous options, docker-mcp asks you itself, through your app: what goes, or what the container would get, and a yes or no. Your answer goes to docker-mcp, not to the agent, so the agent can't answer for you. If you say no, nothing changes. The question waits up to an hour for your answer; if it goes unanswered, nothing changes either.
+Before what can't be undone (removing a container, an image, a volume or a network, cleaning up with `prune`, stopping a Compose project with its volumes, resetting a lab) and before a container with dangerous options, docker-mcp asks you itself, through your app: what goes, or what the container would get, and a yes or no. Your answer goes to docker-mcp, not to the agent, so the agent can't answer for you. If you say no, nothing changes. Stopping a lab doesn't ask: its files stay and it starts again as it was, so an agent can clean up the labs it started even when nobody is there to answer. The question waits up to an hour for your answer; if it goes unanswered, nothing changes either.
 
 The question is in your app's language when the app tells docker-mcp, through its locale (`LANG`, `LC_MESSAGES` or `LC_ALL`, as agent-kit does): English and Spanish so far, and English otherwise. What the agent reads stays in English.
 
