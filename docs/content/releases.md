@@ -5,6 +5,12 @@ sidebar_label: Releases
 
 # Releases
 
+## 0.4.0
+
+November 15, 2026.
+
+- **Stopping a lab doesn't ask any more.** `lab_down` stops a lab without asking you, like `lab_up` starts it: its files stay and `lab_up` brings it back, so an agent can clean up the labs it started even when nobody is there to answer. Resetting a lab still asks. See [Modes and settings](modes.md#you-confirm-not-the-agent).
+
 ## 0.3.0
 
 November 10, 2026.

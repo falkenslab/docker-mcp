@@ -5,6 +5,12 @@ sidebar_label: Versiones
 
 # Versiones
 
+## 0.4.0
+
+15 de noviembre de 2026.
+
+- **Parar un laboratorio ya no pregunta.** `lab_down` para un laboratorio sin preguntarte, igual que `lab_up` lo arranca: sus archivos se quedan y `lab_up` lo vuelve a levantar, así que un agente puede recoger los laboratorios que arrancó aunque no haya nadie para contestar. Reiniciar un laboratorio sigue preguntando. Mira [Modos y ajustes](modes.md#confirmas-tú-no-el-agente).
+
 ## 0.3.0
 
 10 de noviembre de 2026.
